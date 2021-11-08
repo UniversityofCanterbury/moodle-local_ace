@@ -651,7 +651,7 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
  * @param string $messagehtml - email message.
  * @return bool
  */
-function send_bulk_email($userids, $emailsubject, $messagehtml) {
+function local_ace_send_bulk_email($userids, $emailsubject, $messagehtml): bool {
 
     global $DB;
     global $CFG;

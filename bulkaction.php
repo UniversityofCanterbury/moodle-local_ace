@@ -76,7 +76,7 @@ if ($mform->is_cancelled()) { // If cancelled, redirect back to report view.
 
     if ($emailsubject && $emailmessage) {
         if (isset($SESSION->userids)) {
-            $bulkemail = send_bulk_email($SESSION->userids, $emailsubject, $emailmessage);
+            $bulkemail = local_ace_send_bulk_email($SESSION->userids, $emailsubject, $emailmessage);
         }
     }
 
