@@ -649,10 +649,9 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
  * @param array $userids - submitted user id's.
  * @param string $emailsubject - email subject.
  * @param string $messagehtml - email message.
- *
  * @return bool
  */
-function sendbulkemail($userids, $emailsubject, $messagehtml) {
+function send_bulk_email($userids, $emailsubject, $messagehtml) {
 
     global $DB;
     global $CFG;
@@ -668,35 +667,16 @@ function sendbulkemail($userids, $emailsubject, $messagehtml) {
                 return false;
             }
 
-            $touser = new stdClass();
-            $touser->email = $userdata->email;
-            $touser->username = $userdata->username;
-            $touser->firstname = $userdata->firstname;
-            $touser->lastname = '';
-            $touser->maildisplay = true;
-            $touser->mailformat = 0;
-            $touser->id = $userid;
-            $touser->firstnamephonetic = '';
-            $touser->lastnamephonetic = '';
-            $touser->middlename = '';
-            $touser->alternatename = '';
+            $fromuser = \core_user::get_support_user();
 
-            $fromuser = new stdClass();
-            $fromuser->email = $CFG->supportemail;
-            $fromuser->firstname = $CFG->supportname;
-            $fromuser->lastname = '';
-            $fromuser->maildisplay = true;
-            $fromuser->mailformat = 0;
-            $fromuser->id = $userid;
-            $fromuser->firstnamephonetic = '';
-            $fromuser->lastnamephonetic = '';
-            $fromuser->middlename = '';
-            $fromuser->alternatename = '';
+            if (!$fromuser) {
+                return false;
+            }
 
             $messagetext = html_to_text($messagehtml);
 
             try {
-                email_to_user($touser, $fromuser, $emailsubject, $messagetext, $messagehtml, '', '', true);
+                email_to_user($userdata, $fromuser, $emailsubject, $messagetext, $messagehtml, '', '', true);
                 return true;
             } catch (Exception $e) {
                 return false;

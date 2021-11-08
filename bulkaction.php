@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A report to display the all backup files on the site.
+ * A page that provides an admin bulk email messaging.
  *
  * @package    local_ace
  * @copyright   2021 University of Canterbury
@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/local/ace/locallib.php');
 
 require_login();
 
-$PAGE->set_url(new moodle_url(get_local_referer(false)));
+$PAGE->set_url('/local/ace/bulkaction.php');
 $PAGE->set_context(context_system::instance());
 $PAGE->set_heading(get_string("bulkemailheading", "local_ace"));
 
@@ -42,14 +42,12 @@ if (get_local_referer(false) != null) {
     $PAGE->navbar->add(get_string("bulkemailbreadcrumbs", "local_ace"), new moodle_url(get_local_referer(false)));
 
     if (strpos(get_local_referer(false), 'id=') !== false) {
-        $SESSION->redirecturl = null;
-        $SESSION->redirecturl = get_local_referer(false);
+        $SESSION->wantsurl = get_local_referer(false);
     }
 }
 
 // Add id's to session.
 if (!empty($userids)) {
-    $SESSION->userids = null;
     $SESSION->userids = $userids;
 }
 
@@ -59,13 +57,13 @@ $mform = new bulkaction_form();
 
 if ($mform->is_cancelled()) { // If cancelled, redirect back to report view.
 
-    redirect($SESSION->redirecturl, null, null, null);
+    redirect($SESSION->wantsurl, null, null, null);
     echo $OUTPUT->header();
 
 } else if ($mform->get_data()) { // If submitted, send emails to all users selected.
 
-    $emailsubject = (string)'';
-    $emailmessage = (string)'';
+    $emailsubject = '';
+    $emailmessage = '';
     $data = $mform->get_data();
 
     if (isset($data->emailsubject)) {
@@ -78,15 +76,15 @@ if ($mform->is_cancelled()) { // If cancelled, redirect back to report view.
 
     if ($emailsubject && $emailmessage) {
         if (isset($SESSION->userids)) {
-            $bulkemail = sendbulkemail($SESSION->userids, $emailsubject, $emailmessage);
+            $bulkemail = send_bulk_email($SESSION->userids, $emailsubject, $emailmessage);
         }
     }
 
     // Notify and redirect admin user back to the report view.
     if ($bulkemail) {
-        redirect($SESSION->redirecturl, get_string("emailsent", "local_ace"), null, \core\output\notification::NOTIFY_SUCCESS);
+        redirect($SESSION->wantsurl, get_string("emailsent", "local_ace"), null, \core\output\notification::NOTIFY_SUCCESS);
     } else {
-        redirect($SESSION->redirecturl, get_string("emailfailed", "local_ace"), null, \core\output\notification::NOTIFY_ERROR);
+        redirect($SESSION->wantsurl, get_string("emailfailed", "local_ace"), null, \core\output\notification::NOTIFY_ERROR);
     }
 
     echo $OUTPUT->header();
