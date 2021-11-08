@@ -21,6 +21,7 @@ namespace local_ace\reportbuilder\datasource;
 use core_reportbuilder\datasource;
 use local_ace\local\entities\userentity;
 use core_reportbuilder\local\helpers\database;
+use lang_string;
 
 /**
  * Users datasource
@@ -44,17 +45,15 @@ class users extends datasource {
      * Initialise report
      */
     protected function initialise(): void {
-        global $CFG, $COURSE;
+        global $CFG;
 
         $userentity = new userentity();
         $usertablealias = $userentity->get_table_alias('user');
-        $usercoursealias = $userentity->get_table_alias('course');
 
         $this->set_main_table('user', $usertablealias);
 
         $userparamguest = database::generate_param_name();
-        $this->add_base_condition_sql("{$usertablealias}.id != :{$userparamguest} AND {$usertablealias}.deleted = 0
-        AND {$usercoursealias}.id = $COURSE->id"
+        $this->add_base_condition_sql("{$usertablealias}.id != :{$userparamguest} AND {$usertablealias}.deleted = 0"
             , [$userparamguest => $CFG->siteguest,
             ]);
 
@@ -66,9 +65,11 @@ class users extends datasource {
         $this->add_filters_from_entity($userentityname);
         $this->add_conditions_from_entity($userentityname);
 
+        $emailselected = new lang_string('bulkactionbuttonvalue', 'local_ace');
+
         $this->add_action_button([
             'formaction' => '/local/ace/bulkaction.php',
-            'buttonvalue' => 'Email Selected',
+            'buttonvalue' => $emailselected,
             'buttonid' => 'emailallselected',
         ], true);
     }

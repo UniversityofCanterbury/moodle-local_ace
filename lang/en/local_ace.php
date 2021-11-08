@@ -102,3 +102,7 @@ $string['emailsent'] = 'Emails have been sent to selected users';
 $string['emailfailed'] = 'Unfortunately something went wrong and the emails have not sent. Please Try again';
 $string['bulkemailheading'] = 'Bulk emails';
 $string['bulkemailbreadcrumbs'] = 'Bulk email messages';
+$string['bulkactionbuttonvalue'] = 'Email Selected';
+
+
+
