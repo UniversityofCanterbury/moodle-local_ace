@@ -95,3 +95,10 @@ $string['privacy:metadata:local_ace:userid'] = 'The Moodle userid';
 $string['privacy:metadata:local_ace:starttime'] = 'The start of the analysis period';
 $string['privacy:metadata:local_ace:endtime'] = 'The end of the analysis period';
 $string['privacy:metadata:local_ace:value'] = 'The average indicator value for this period';
+
+$string['emailtext'] = 'Email text';
+$string['emailsubject'] = 'Email subject';
+$string['emailsent'] = 'Emails have been sent to selected users';
+$string['emailfailed'] = 'Unfortunately something went wrong and the emails have not sent. Please Try again';
+$string['bulkemailheading'] = 'Bulk emails';
+$string['bulkemailbreadcrumbs'] = 'Bulk email messages';

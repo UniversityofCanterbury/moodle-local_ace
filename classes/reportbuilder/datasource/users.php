@@ -44,15 +44,17 @@ class users extends datasource {
      * Initialise report
      */
     protected function initialise(): void {
-        global $CFG;
+        global $CFG, $COURSE;
 
         $userentity = new userentity();
         $usertablealias = $userentity->get_table_alias('user');
+        $usercoursealias = $userentity->get_table_alias('course');
 
         $this->set_main_table('user', $usertablealias);
 
         $userparamguest = database::generate_param_name();
-        $this->add_base_condition_sql("{$usertablealias}.id != :{$userparamguest} AND {$usertablealias}.deleted = 0"
+        $this->add_base_condition_sql("{$usertablealias}.id != :{$userparamguest} AND {$usertablealias}.deleted = 0
+        AND {$usercoursealias}.id = $COURSE->id"
             , [$userparamguest => $CFG->siteguest,
             ]);
 
@@ -63,6 +65,12 @@ class users extends datasource {
         $this->add_columns_from_entity($userentityname);
         $this->add_filters_from_entity($userentityname);
         $this->add_conditions_from_entity($userentityname);
+
+        $this->add_action_button([
+            'formaction' => '/local/ace/bulkaction.php',
+            'buttonvalue' => 'Email Selected',
+            'buttonid' => 'emailallselected',
+        ], true);
     }
 
     /**

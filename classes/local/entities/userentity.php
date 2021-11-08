@@ -28,13 +28,13 @@ use core_reportbuilder\local\filters\boolean_select;
 use core_reportbuilder\local\filters\date;
 use core_reportbuilder\local\filters\select;
 use core_reportbuilder\local\filters\text;
-use local_ace\local\filters\course;
 use core_reportbuilder\local\helpers\user_profile_fields;
 use core_reportbuilder\local\helpers\format;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
 use core_reportbuilder\local\entities\user;
 use core_reportbuilder\local\entities\base;
+use core_reportbuilder\local\report\base as base_report;
 
 /**
  * User entity class implementation.
@@ -142,13 +142,13 @@ class userentity extends user {
         $userpictureselect = fields::for_userpic()->get_sql($usertablealias, false, '', '', false)->selects;
         $viewfullnames = has_capability('moodle/site:viewfullnames', context_system::instance());
 
-        $lastaccessjoin = "JOIN {user_enrolments} {$userenrolmentsalias}
-                               ON {$userenrolmentsalias}.userid = {$usertablealias}.id
-                          JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
-                          JOIN {course} {$coursealias} ON {$enrolalias}.courseid = {$coursealias}.id
+        $lastaccessjoin = "JOIN {user_enrolments} laue
+                               ON laue.userid = {$usertablealias}.id
+                          JOIN {enrol} lae ON lae.id = laue.enrolid
+                          JOIN {course} lac ON lae.courseid = lac.id
                           LEFT JOIN {user_lastaccess} {$userlastaccessalias}
                            ON {$userlastaccessalias}.userid = {$usertablealias}.id
-                           AND {$userlastaccessalias}.courseid = {$coursealias}.id";
+                           AND {$userlastaccessalias}.courseid = lac.id";
 
         $join = "
                 INNER JOIN {user_enrolments} {$userenrolmentsalias}
@@ -173,6 +173,8 @@ class userentity extends user {
                     GROUP BY contextid
                 ) AS {$logstorealiassub2} ON {$logstorealiassub2}.contextid = {$contexttablealias}.id
         ";
+
+        $columns[] = base_report::is_selectable(true, $this, $usertablealias);
 
         // Fullname column.
         $columns[] = (new column(
@@ -447,7 +449,6 @@ class userentity extends user {
     protected function get_all_filters(): array {
         $filters = [];
         $tablealias = $this->get_table_alias('user');
-        $coursetablealias = $this->get_table_alias('course');
 
         // Fullname filter.
         $canviewfullnames = has_capability('moodle/site:viewfullnames', context_system::instance());
@@ -459,15 +460,6 @@ class userentity extends user {
             $this->get_entity_name(),
             $fullnamesql,
             $fullnameparams
-        ))
-            ->add_joins($this->get_joins());
-
-        $filters[] = (new filter(
-            course::class,
-            'course',
-            new lang_string('course'),
-            $this->get_entity_name(),
-            "{$coursetablealias}.id"
         ))
             ->add_joins($this->get_joins());
 

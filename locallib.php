@@ -642,3 +642,67 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
         'stepsize' => $stepsize,
     );
 }
+
+/**
+ * Send bulk emails to users.
+ *
+ * @param array $userids - submitted user id's.
+ * @param string $emailsubject - email subject.
+ * @param string $messagehtml - email message.
+ *
+ * @return bool
+ */
+function sendbulkemail($userids, $emailsubject, $messagehtml) {
+
+    global $DB;
+    global $CFG;
+
+    if (!empty($userids)) {
+
+        foreach ($userids as $userid) {
+
+            // Get user emails address from id.
+            $userdata = $DB->get_record('user', array('id' => $userid));
+
+            if (!$userdata) {
+                return false;
+            }
+
+            $touser = new stdClass();
+            $touser->email = $userdata->email;
+            $touser->username = $userdata->username;
+            $touser->firstname = $userdata->firstname;
+            $touser->lastname = '';
+            $touser->maildisplay = true;
+            $touser->mailformat = 0;
+            $touser->id = $userid;
+            $touser->firstnamephonetic = '';
+            $touser->lastnamephonetic = '';
+            $touser->middlename = '';
+            $touser->alternatename = '';
+
+            $fromuser = new stdClass();
+            $fromuser->email = $CFG->supportemail;
+            $fromuser->firstname = $CFG->supportname;
+            $fromuser->lastname = '';
+            $fromuser->maildisplay = true;
+            $fromuser->mailformat = 0;
+            $fromuser->id = $userid;
+            $fromuser->firstnamephonetic = '';
+            $fromuser->lastnamephonetic = '';
+            $fromuser->middlename = '';
+            $fromuser->alternatename = '';
+
+            $messagetext = html_to_text($messagehtml);
+
+            try {
+                email_to_user($touser, $fromuser, $emailsubject, $messagetext, $messagehtml, '', '', true);
+                return true;
+            } catch (Exception $e) {
+                return false;
+            }
+        }
+    } else {
+        return false;
+    }
+}
