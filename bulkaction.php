@@ -58,7 +58,6 @@ $mform = new bulkaction_form();
 if ($mform->is_cancelled()) { // If cancelled, redirect back to report view.
 
     redirect($SESSION->wantsurl, null, null, null);
-    echo $OUTPUT->header();
 
 } else if ($mform->get_data()) { // If submitted, send emails to all users selected.
 
