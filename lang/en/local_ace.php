@@ -95,7 +95,7 @@ $string['privacy:metadata:local_ace:userid'] = 'The Moodle userid';
 $string['privacy:metadata:local_ace:starttime'] = 'The start of the analysis period';
 $string['privacy:metadata:local_ace:endtime'] = 'The end of the analysis period';
 $string['privacy:metadata:local_ace:value'] = 'The average indicator value for this period';
-
+$string['customlink'] = 'Custom link parameter';
 $string['emailtext'] = 'Email text';
 $string['emailsubject'] = 'Email subject';
 $string['emailsent'] = 'Emails have been sent to selected users';

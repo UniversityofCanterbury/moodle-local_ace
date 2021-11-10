@@ -64,6 +64,21 @@ class users extends datasource {
         $this->add_columns_from_entity($userentityname);
         $this->add_filters_from_entity($userentityname);
         $this->add_conditions_from_entity($userentityname);
+        $conditiondata = (array) json_decode($this->get_report_persistent()->get('conditiondata'));
+        if (!empty($conditiondata) && !empty($conditiondata['userentity:customlink'])) {
+            $url = $conditiondata['userentity:customlink'];
+
+            if ($column = $this->get_column('userentity:fullname')) {
+                $column->set_callback(static function(?string $value, $row) use ($url): string {
+                    $url = new \moodle_url($url, ['userid' => $row->id]);
+                    if ($value === null) {
+                        return '';
+                    }
+                    return \html_writer::link($url, fullname($row));});
+            };
+        }
+
+        $column->set_title(new lang_string('user', 'admin'));
 
         $emailselected = new lang_string('bulkactionbuttonvalue', 'local_ace');
 

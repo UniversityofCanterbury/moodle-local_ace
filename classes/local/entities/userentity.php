@@ -30,6 +30,7 @@ use core_reportbuilder\local\filters\select;
 use core_reportbuilder\local\filters\text;
 use local_ace\local\filters\pagecontextcourse;
 use local_ace\local\filters\myenrolledcourses;
+use local_ace\local\filters\customlink;
 use core_reportbuilder\local\helpers\user_profile_fields;
 use core_reportbuilder\local\helpers\format;
 use core_reportbuilder\local\report\column;
@@ -387,7 +388,7 @@ class userentity extends user {
             return $userfield;
         }, fields::get_name_fields(true));
 
-        return implode(', ', $userfields);
+        return implode(', ', $userfields). ', '.$usertablealias.".id as id";
     }
 
     /**
@@ -483,6 +484,14 @@ class userentity extends user {
             "{$coursetablealias}.id"
         ))
             ->add_joins($this->get_joins());
+
+        $filters[] = (new filter(
+            customlink::class,
+            'customlink',
+            new lang_string('customlink', 'local_ace'),
+            $this->get_entity_name(),
+            "{$coursetablealias}.id"
+        ))->add_joins($this->get_joins());
 
         // User fields filters.
         $fields = $this->get_user_fields();
