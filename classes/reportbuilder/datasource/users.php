@@ -52,11 +52,14 @@ class users extends datasource {
     protected function initialise(): void {
         global $CFG;
 
+        $usercore = new user();
+        $usercorealias = $usercore->get_table_alias('user');
+        $this->add_entity($usercore);
+        $this->set_main_table('user', $usercorealias);
+
         // Join the user entity to the cohort member entity.
         $userentity = new userentity();
         $usertablealias = $userentity->get_table_alias('user');
-
-        $this->set_main_table('user', $usertablealias);
         $this->add_entity($userentity);
 
         $userparamguest = database::generate_param_name();
@@ -78,7 +81,7 @@ class users extends datasource {
         // Add course entity.
         $courseentity = new course();
         $coursetablealias = $courseentity->get_table_alias('course');
-        $contexttablealias = $courseentity->get_table_alias('context');
+        $contexttablealias = 'cctxx';
         $coursejoin = "JOIN {course} {$coursetablealias} ON {$coursetablealias}.id = {$enrolalias}.courseid";
 
         $this->add_entity($courseentity->add_join($coursejoin));
@@ -87,21 +90,25 @@ class users extends datasource {
         $acesamplesentity = new acesamples();
         $acesamplesalias = $acesamplesentity->get_table_alias('local_ace_samples');
         $acesamplejoin = "LEFT JOIN {local_ace_samples} {$acesamplesalias}
-                             ON {$acesamplesalias}.userid = {$usertablealias}.id
-                             AND {$contexttablealias}.id = {$acesamplesalias}.contextid";
+                          ON {$acesamplesalias}.userid = {$usertablealias}.id
+                          JOIN {context} {$contexttablealias}
+                          ON {$contexttablealias}.id = {$acesamplesalias}.contextid";
 
         $this->add_entity($acesamplesentity->add_join($acesamplejoin));
 
+        $this->add_columns_from_entity($usercore->get_entity_name());
         $this->add_columns_from_entity($userentity->get_entity_name());
         $this->add_columns_from_entity($enrolmententity->get_entity_name());
         $this->add_columns_from_entity($courseentity->get_entity_name());
         $this->add_columns_from_entity($acesamplesentity->get_entity_name());
 
+        $this->add_filters_from_entity($usercore->get_entity_name());
         $this->add_filters_from_entity($userentity->get_entity_name());
         $this->add_filters_from_entity($enrolmententity->get_entity_name());
         $this->add_filters_from_entity($courseentity->get_entity_name());
         $this->add_filters_from_entity($acesamplesentity->get_entity_name());
 
+        $this->add_conditions_from_entity($usercore->get_entity_name());
         $this->add_conditions_from_entity($userentity->get_entity_name());
         $this->add_conditions_from_entity($enrolmententity->get_entity_name());
         $this->add_conditions_from_entity($courseentity->get_entity_name());
@@ -123,7 +130,7 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_columns(): array {
-        return [];
+        return ['user:fullname', 'user:username', 'user:email'];
     }
 
     /**
@@ -132,7 +139,7 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_filters(): array {
-        return [];
+        return ['user:fullname', 'user:username', 'user:email'];
     }
 
     /**
@@ -141,6 +148,6 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_conditions(): array {
-        return [];
+        return ['user:fullname', 'user:username', 'user:email'];
     }
 }

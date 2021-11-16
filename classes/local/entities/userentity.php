@@ -56,7 +56,7 @@ class userentity extends base {
      */
     protected function get_default_table_aliases(): array {
         return [
-            'user' => 'uu',
+            'user' => 'u',
             'enrol' => 'ue',
             'user_enrolments' => 'uue',
             'user_lastaccess' => 'uul',
