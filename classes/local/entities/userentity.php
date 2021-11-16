@@ -47,7 +47,7 @@ use core_reportbuilder\local\report\base as base_report;
  * @copyright  2021 University of Canterbury
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class userentity extends user {
+class userentity extends base {
 
     /**
      * Database tables that this entity uses and their default aliases
@@ -56,17 +56,17 @@ class userentity extends user {
      */
     protected function get_default_table_aliases(): array {
         return [
-            'user' => 'u',
-            'enrol' => 'e',
-            'user_enrolments' => 'ue',
-            'user_lastaccess' => 'ula',
-            'course' => 'c',
-            'course_modules' => 'cm',
-            'modules' => 'm',
-            'assign' => 'a',
-            'assign_submission' => 'asub',
-            'logstore_standard_log' => 'ls',
-            'context' => 'ctx',
+            'user' => 'uu',
+            'enrol' => 'ue',
+            'user_enrolments' => 'uue',
+            'user_lastaccess' => 'uul',
+            'course' => 'uc',
+            'course_modules' => 'ucm',
+            'modules' => 'um',
+            'assign' => 'ua',
+            'assign_submission' => 'uas',
+            'logstore_standard_log' => 'ulsl',
+            'context' => 'uctx',
         ];
     }
 
@@ -76,45 +76,29 @@ class userentity extends user {
      * @return lang_string
      */
     protected function get_default_entity_title(): lang_string {
-        return new lang_string('entityuser', 'core_reportbuilder');
+        return new lang_string('userentitytitle', 'local_ace');
     }
 
-    /**
-     * Initialise the entity, add all user fields and all 'visible' user profile fields
-     *
-     * @return base
-     */
+     /**
+      * Initialise the entity, add all user fields and all 'visible' user profile fields
+      *
+      * @return base
+      */
     public function initialise(): base {
-        $userprofilefields = $this->get_user_profile_fields();
 
-        $columns = array_merge($this->get_all_columns(), $userprofilefields->get_columns());
+        $columns = $this->get_all_columns();
         foreach ($columns as $column) {
             $this->add_column($column);
         }
 
-        $filters = array_merge($this->get_all_filters(), $userprofilefields->get_filters());
+        $filters = $this->get_all_filters();
         foreach ($filters as $filter) {
-            $this->add_filter($filter);
-        }
-
-        // TODO: differentiate between filters and conditions (specifically the 'date' type: MDL-72662).
-        $conditions = array_merge($this->get_all_filters(), $userprofilefields->get_filters());
-        foreach ($conditions as $condition) {
-            $this->add_condition($condition);
+            $this
+                ->add_filter($filter)
+                ->add_condition($filter);
         }
 
         return $this;
-    }
-
-    /**
-     * Get user profile fields helper instance
-     *
-     * @return user_profile_fields
-     */
-    protected function get_user_profile_fields(): user_profile_fields {
-        $userprofilefields = new user_profile_fields($this->get_table_alias('user') . '.id', $this->get_entity_name());
-        $userprofilefields->add_joins($this->get_joins());
-        return $userprofilefields;
     }
 
     /**
@@ -140,18 +124,6 @@ class userentity extends user {
         $logstorealiassub1 = 'logs_sub_select_1';
         $logstorealiassub2 = 'logs_sub_select_2';
 
-        $fullnameselect = self::get_name_fields_select($usertablealias);
-        $userpictureselect = fields::for_userpic()->get_sql($usertablealias, false, '', '', false)->selects;
-        $viewfullnames = has_capability('moodle/site:viewfullnames', context_system::instance());
-
-        $lastaccessjoin = "JOIN {user_enrolments} {$userenrolmentsalias}
-                               ON {$userenrolmentsalias}.userid = {$usertablealias}.id
-                          JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
-                          JOIN {course} {$coursealias} ON {$enrolalias}.courseid = {$coursealias}.id
-                          LEFT JOIN {user_lastaccess} {$userlastaccessalias}
-                           ON {$userlastaccessalias}.userid = {$usertablealias}.id
-                           AND {$userlastaccessalias}.courseid = {$coursealias}.id";
-
         $join = "
                 INNER JOIN {user_enrolments} {$userenrolmentsalias}
                 ON {$userenrolmentsalias}.userid = {$usertablealias}.id
@@ -175,40 +147,6 @@ class userentity extends user {
                     GROUP BY contextid
                 ) AS {$logstorealiassub2} ON {$logstorealiassub2}.contextid = {$contexttablealias}.id
         ";
-
-        $columns[] = base_report::is_selectable(true, $this, $usertablealias);
-
-        // Fullname column.
-        $columns[] = (new column(
-            'fullname',
-            new lang_string('fullname'),
-            $this->get_entity_name()
-        ))
-            ->add_joins($this->get_joins())
-            ->add_fields($fullnameselect)
-            ->set_type(column::TYPE_TEXT)
-            ->set_is_sortable($this->is_sortable('fullname'))
-            ->add_callback(static function(?string $value, stdClass $row) use ($viewfullnames): string {
-                if ($value === null) {
-                    return '';
-                }
-
-                return fullname($row, $viewfullnames);
-            });
-
-        // Last accessed to course column.
-        $columns[] = (new column(
-            'lastaccessedtocourse',
-            new lang_string('lastaccessedtocourse', 'local_ace'),
-            $this->get_entity_name()
-        ))
-            ->add_join($lastaccessjoin)
-            ->set_type(column::TYPE_TEXT)
-            ->set_is_sortable(true)
-            ->add_field("$userlastaccessalias.timeaccess")
-            ->add_callback(static function ($value): string {
-                return !empty($value) ? userdate($value) : get_string('never');
-            });
 
         // Last access in 7 days column.
         $columns[] = (new column(
@@ -242,152 +180,7 @@ class userentity extends user {
                 return $value;
             });
 
-        // Formatted fullname columns (with link, picture or both).
-        $fullnamefields = [
-            'fullnamewithlink' => new lang_string('userfullnamewithlink', 'core_reportbuilder'),
-            'fullnamewithpicture' => new lang_string('userfullnamewithpicture', 'core_reportbuilder'),
-            'fullnamewithpicturelink' => new lang_string('userfullnamewithpicturelink', 'core_reportbuilder'),
-        ];
-        foreach ($fullnamefields as $fullnamefield => $fullnamelang) {
-            $column = (new column(
-                $fullnamefield,
-                $fullnamelang,
-                $this->get_entity_name()
-            ))
-                ->add_joins($this->get_joins())
-                ->add_fields($fullnameselect)
-                ->add_field("{$usertablealias}.id")
-                ->set_type(column::TYPE_TEXT)
-                ->set_is_sortable($this->is_sortable($fullnamefield))
-                ->add_callback(static function(?string $value, stdClass $row) use ($fullnamefield, $viewfullnames): string {
-                    global $OUTPUT;
-
-                    if ($value === null) {
-                        return '';
-                    }
-
-                    if ($fullnamefield === 'fullnamewithlink') {
-                        return html_writer::link(new moodle_url('/user/profile.php', ['id' => $row->id]),
-                            fullname($row, $viewfullnames));
-                    }
-                    if ($fullnamefield === 'fullnamewithpicture') {
-                        return $OUTPUT->user_picture($row, ['link' => false, 'alttext' => false]) .
-                            fullname($row, $viewfullnames);
-                    }
-                    if ($fullnamefield === 'fullnamewithpicturelink') {
-                        return html_writer::link(new moodle_url('/user/profile.php', ['id' => $row->id]),
-                            $OUTPUT->user_picture($row, ['link' => false, 'alttext' => false]) .
-                            fullname($row, $viewfullnames));
-                    }
-
-                    return $value;
-                });
-
-            // Picture fields need some more data.
-            if (strpos($fullnamefield, 'picture') !== false) {
-                $column->add_fields($userpictureselect);
-            }
-
-            $columns[] = $column;
-        }
-
-        // Picture column.
-        $columns[] = (new column(
-            'picture',
-            new lang_string('userpicture', 'core_reportbuilder'),
-            $this->get_entity_name()
-        ))
-            ->add_joins($this->get_joins())
-            ->add_fields($userpictureselect)
-            ->set_type(column::TYPE_INTEGER)
-            ->set_is_sortable($this->is_sortable('picture'))
-            ->add_callback(static function (int $value, stdClass $row): string {
-                global $OUTPUT;
-
-                return !empty($row->id) ? $OUTPUT->user_picture($row, ['link' => false, 'alttext' => false]) : '';
-            });
-
-        // Add all other user fields.
-        $userfields = $this->get_user_fields();
-        foreach ($userfields as $userfield => $userfieldlang) {
-            $columntype = $this->get_user_field_type($userfield);
-
-            $column = (new column(
-                $userfield,
-                $userfieldlang,
-                $this->get_entity_name()
-            ))
-                ->add_joins($this->get_joins())
-                ->add_field("{$usertablealias}.{$userfield}")
-                ->set_type($columntype)
-                ->set_is_sortable($this->is_sortable($userfield))
-                ->add_callback([$this, 'format'], $userfield);
-
-            // Some columns also have specific format callbacks.
-            if ($userfield === 'country') {
-                $column->add_callback(static function(string $country): string {
-                    $countries = get_string_manager()->get_list_of_countries(true);
-                    return $countries[$country] ?? '';
-                });
-            }
-
-            $columns[] = $column;
-        }
-
         return $columns;
-    }
-
-    /**
-     * Check if this field is sortable
-     *
-     * @param string $fieldname
-     * @return bool
-     */
-    protected function is_sortable(string $fieldname): bool {
-        // Some columns can't be sorted, like longtext or images.
-        $nonsortable = [
-            'picture',
-        ];
-
-        return !in_array($fieldname, $nonsortable);
-    }
-
-    /**
-     * Formats the user field for display.
-     *
-     * @param mixed $value Current field value.
-     * @param stdClass $row Complete row.
-     * @param string $fieldname Name of the field to format.
-     * @return string
-     */
-    public function format($value, stdClass $row, string $fieldname): string {
-        if ($this->get_user_field_type($fieldname) === column::TYPE_BOOLEAN) {
-            return format::boolean_as_text($value);
-        }
-
-        if ($this->get_user_field_type($fieldname) === column::TYPE_TIMESTAMP) {
-            return format::userdate($value, $row);
-        }
-
-        return s($value);
-    }
-
-    /**
-     * Returns a SQL statement to select all user fields necessary for fullname() function
-     *
-     * @param string $usertablealias
-     * @return string
-     */
-    public static function get_name_fields_select(string $usertablealias = 'u'): string {
-        $userfields = array_map(static function(string $userfield) use ($usertablealias): string {
-            if (!empty($usertablealias)) {
-                $userfield = "{$usertablealias}.{$userfield}";
-            }
-
-            return $userfield;
-        }, fields::get_name_fields(true));
-
-        return implode(', ', $userfields);
     }
 
     /**
@@ -450,8 +243,82 @@ class userentity extends user {
      */
     protected function get_all_filters(): array {
         $filters = [];
+
         $tablealias = $this->get_table_alias('user');
         $coursetablealias = $this->get_table_alias('course');
+        $userenrolmentsalias = $this->get_table_alias('user_enrolments');
+        $coursealias = $this->get_table_alias('course');
+        $coursemodulesalias = $this->get_table_alias('course_modules');
+        $modulesalias = $this->get_table_alias('modules');
+        $enrolalias = $this->get_table_alias('enrol');
+        $assignalias = $this->get_table_alias('assign');
+        $assignsubmissionalias = $this->get_table_alias('assign_submission');
+        $logstorealias = $this->get_table_alias('logstore_standard_log');
+        $userlastaccessalias = $this->get_table_alias('user_lastaccess');
+        $contexttablealias = $this->get_table_alias('context');
+        $logstorealiassub1 = 'logs_sub_select_1';
+        $logstorealiassub2 = 'logs_sub_select_2';
+
+        $join = "
+                INNER JOIN {user_enrolments} {$userenrolmentsalias}
+                ON {$userenrolmentsalias}.userid = {$tablealias}.id
+                INNER JOIN {enrol} {$enrolalias}
+                ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
+                INNER JOIN {course} {$coursetablealias}
+                ON {$enrolalias}.courseid = {$coursetablealias}.id
+                LEFT JOIN {context} {$contexttablealias}
+                ON {$contexttablealias}.contextlevel = " . CONTEXT_COURSE . "
+                AND {$contexttablealias}.instanceid = {$coursealias}.id
+                LEFT JOIN (
+                    SELECT contextid, max(timecreated) AS maxtimecreated, COUNT(*) AS last7
+                    FROM {logstore_standard_log}
+                    WHERE timecreated > extract(epoch from (now() - interval '7 days'))
+                    GROUP BY contextid
+                    ) AS {$logstorealiassub1} ON {$logstorealiassub1}.contextid = {$contexttablealias}.id
+                    LEFT JOIN (
+                    SELECT contextid, COUNT(*) AS last30
+                    FROM {logstore_standard_log}
+                    WHERE timecreated > extract(epoch from (now() - interval '30 days'))
+                    GROUP BY contextid
+                ) AS {$logstorealiassub2} ON {$logstorealiassub2}.contextid = {$contexttablealias}.id
+        ";
+
+        $userenrolmentsalias = $this->get_table_alias('user_enrolments');
+        $coursealias = $this->get_table_alias('course');
+        $coursemodulesalias = $this->get_table_alias('course_modules');
+        $modulesalias = $this->get_table_alias('modules');
+        $enrolalias = $this->get_table_alias('enrol');
+        $assignalias = $this->get_table_alias('assign');
+        $assignsubmissionalias = $this->get_table_alias('assign_submission');
+        $logstorealias = $this->get_table_alias('logstore_standard_log');
+        $userlastaccessalias = $this->get_table_alias('user_lastaccess');
+        $contexttablealias = $this->get_table_alias('context');
+        $logstorealiassub1 = 'logs_sub_select_1';
+        $logstorealiassub2 = 'logs_sub_select_2';
+
+        $join = "
+                INNER JOIN {user_enrolments} {$userenrolmentsalias}
+                ON {$userenrolmentsalias}.userid = {$tablealias}.id
+                INNER JOIN {enrol} {$enrolalias}
+                ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
+                INNER JOIN {course} {$coursetablealias}
+                ON {$enrolalias}.courseid = {$coursetablealias}.id
+                LEFT JOIN {context} {$contexttablealias}
+                ON {$contexttablealias}.contextlevel = " . CONTEXT_COURSE . "
+                AND {$contexttablealias}.instanceid = {$coursetablealias}.id
+                LEFT JOIN (
+                    SELECT contextid, max(timecreated) AS maxtimecreated, COUNT(*) AS last7
+                    FROM {logstore_standard_log}
+                    WHERE timecreated > extract(epoch from (now() - interval '7 days'))
+                    GROUP BY contextid
+                    ) AS {$logstorealiassub1} ON {$logstorealiassub1}.contextid = {$contexttablealias}.id
+                    LEFT JOIN (
+                    SELECT contextid, COUNT(*) AS last30
+                    FROM {logstore_standard_log}
+                    WHERE timecreated > extract(epoch from (now() - interval '30 days'))
+                    GROUP BY contextid
+                ) AS {$logstorealiassub2} ON {$logstorealiassub2}.contextid = {$contexttablealias}.id
+        ";
 
         // Fullname filter.
         $canviewfullnames = has_capability('moodle/site:viewfullnames', context_system::instance());
@@ -463,24 +330,6 @@ class userentity extends user {
             $this->get_entity_name(),
             $fullnamesql,
             $fullnameparams
-        ))
-            ->add_joins($this->get_joins());
-
-        $filters[] = (new filter(
-            pagecontextcourse::class,
-            'course',
-            new lang_string('pagecontextcourse', 'local_ace'),
-            $this->get_entity_name(),
-            "{$coursetablealias}.id"
-        ))
-            ->add_joins($this->get_joins());
-
-        $filters[] = (new filter(
-            myenrolledcourses::class,
-            'enrolledcourse',
-            new lang_string('myenrolledcourses', 'local_ace'),
-            $this->get_entity_name(),
-            "{$coursetablealias}.id"
         ))
             ->add_joins($this->get_joins());
 
@@ -515,15 +364,26 @@ class userentity extends user {
             $filters[] = $filter;
         }
 
-        return $filters;
-    }
+        // End Time  filter.
+        $filters[] = (new filter(
+            text::class,
+            'log7',
+            new lang_string('last7', 'local_ace'),
+            $this->get_entity_name(),
+            "$logstorealiassub1.last7"
+        ))
+            ->add_join($join);
 
-    /**
-     * List of options for the field country.
-     *
-     * @return string[]
-     */
-    public static function get_options_for_country(): array {
-        return array_map('shorten_text', get_string_manager()->get_list_of_countries());
+                // End Time  filter.
+        $filters[] = (new filter(
+            text::class,
+            'last30',
+            new lang_string('last30', 'local_ace'),
+            $this->get_entity_name(),
+            "$logstorealiassub2.last30"
+        ))
+            ->add_join($join);
+
+        return $filters;
     }
 }

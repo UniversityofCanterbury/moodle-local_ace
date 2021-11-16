@@ -63,16 +63,16 @@ class activityentity extends base {
      */
     protected function get_default_table_aliases(): array {
         return [
-                'user' => 'u',
-                'enrol' => 'e',
-                'user_enrolments' => 'ue',
-                'course' => 'c',
-                'course_modules' => 'cm',
-                'modules' => 'm',
-                'assign' => 'a',
-                'assign_submission' => 'asub',
-                'logstore_standard_log' => 'ls',
-                'context' => 'ctx',
+                'user' => 'au',
+                'enrol' => 'ae',
+                'user_enrolments' => 'aue',
+                'course' => 'ac',
+                'course_modules' => 'acm',
+                'modules' => 'am',
+                'assign' => 'aa',
+                'assign_submission' => 'aas',
+                'logstore_standard_log' => 'alsl',
+                'context' => 'actx',
                ];
     }
 

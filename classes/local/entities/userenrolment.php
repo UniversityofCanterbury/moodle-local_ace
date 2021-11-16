@@ -42,10 +42,10 @@ class userenrolment extends base {
      */
     protected function get_default_table_aliases(): array {
         return [
-            'enrol' => 'e',
-            'user_enrolments' => 'ue',
-            'role' => 'r',
-            'user_lastaccess' => 'ul',
+            'enrol' => 'uee',
+            'user_enrolments' => 'ueue',
+            'role' => 'uer',
+            'user_lastaccess' => 'ueul',
         ];
     }
 
@@ -153,8 +153,7 @@ class userenrolment extends base {
             new lang_string('role', 'local_ace'),
             $this->get_entity_name()
         ))
-            ->add_join("INNER JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
-                             JOIN {role} {$rolealias} ON {$rolealias}.id = {$enrolalias}.roleid")
+            ->add_join("JOIN {role} {$rolealias} ON {$rolealias}.id = {$enrolalias}.roleid")
             ->set_is_sortable(true)
             ->add_fields("$rolealias.shortname");
 
@@ -163,10 +162,9 @@ class userenrolment extends base {
             new lang_string('lastaccessed', 'local_ace'),
             $this->get_entity_name()
         ))
-            ->add_join("JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
-                             LEFT JOIN {user_lastaccess} {$userlastaccessalias}
-                                  ON {$userlastaccessalias}.userid = {$userenrolmentsalias}.id
-                                  AND {$enrolalias}.courseid = {$userlastaccessalias}.courseid")
+            ->add_join("LEFT JOIN {user_lastaccess} {$userlastaccessalias}
+                        ON {$userlastaccessalias}.userid = {$userenrolmentsalias}.id
+                        AND {$enrolalias}.courseid = {$userlastaccessalias}.courseid")
             ->set_is_sortable(true)
             ->set_type(column::TYPE_TIMESTAMP)
             ->add_fields("$userlastaccessalias.timeaccess")

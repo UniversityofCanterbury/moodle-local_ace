@@ -47,7 +47,7 @@ class acesamples extends base {
      */
     protected function get_default_table_aliases(): array {
         return [
-            'local_ace_samples' => 'las',
+            'local_ace_samples' => 'aslas',
         ];
     }
 

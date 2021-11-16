@@ -124,3 +124,5 @@ $string['sampleentitytitle'] = 'ACE samples';
 $string['studentengagement'] = 'Student engagement';
 $string['starttime'] = 'Start time';
 $string['endtime'] = 'End time';
+
+$string['userentitytitle'] = 'Users';

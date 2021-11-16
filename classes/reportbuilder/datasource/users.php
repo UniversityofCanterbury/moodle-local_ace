@@ -19,11 +19,13 @@ declare(strict_types=1);
 namespace local_ace\reportbuilder\datasource;
 
 use core_reportbuilder\datasource;
-use core_reportbuilder\local\entities\user;
 use core_reportbuilder\local\entities\course;
+use core_reportbuilder\local\entities\user;
+use local_ace\local\entities\userentity;
 use local_ace\local\entities\acesamples;
 use local_ace\local\entities\userenrolment;
 use core_reportbuilder\local\helpers\database;
+use core_reportbuilder\local\report\base as base_report;
 use lang_string;
 use moodle_url;
 
@@ -52,11 +54,10 @@ class users extends datasource {
         global $CFG;
 
         // Join the user entity to the cohort member entity.
-        $userentity = new user();
+        $userentity = new userentity();
         $usertablealias = $userentity->get_table_alias('user');
 
         $this->set_main_table('user', $usertablealias);
-
         $this->add_entity($userentity);
 
         $userparamguest = database::generate_param_name();
@@ -89,6 +90,7 @@ class users extends datasource {
         $acesamplejoin = "LEFT JOIN {local_ace_samples} {$acesamplesalias}
                              ON {$acesamplesalias}.userid = {$usertablealias}.id
                              AND {$contexttablealias}.id = {$acesamplesalias}.contextid";
+
         $this->add_entity($acesamplesentity->add_join($acesamplejoin));
 
         $this->add_columns_from_entity($userentity->get_entity_name());
@@ -122,7 +124,7 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_columns(): array {
-        return ['userentity:fullname', 'userentity:username', 'userentity:email'];
+        return [];
     }
 
     /**
@@ -131,7 +133,7 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_filters(): array {
-        return ['userentity:fullname', 'userentity:username', 'userentity:email'];
+        return [];
     }
 
     /**
@@ -140,6 +142,6 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_conditions(): array {
-        return ['userentity:fullname', 'userentity:username', 'userentity:email'];
+        return [];
     }
 }
