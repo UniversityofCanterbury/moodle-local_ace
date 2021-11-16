@@ -148,6 +148,8 @@ class userentity extends base {
                 ) AS {$logstorealiassub2} ON {$logstorealiassub2}.contextid = {$contexttablealias}.id
         ";
 
+        $columns[] = base_report::is_selectable(true, $this, $usertablealias);
+
         // Last access in 7 days column.
         $columns[] = (new column(
             'log7',
