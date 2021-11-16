@@ -25,7 +25,6 @@ use local_ace\local\entities\userentity;
 use local_ace\local\entities\acesamples;
 use local_ace\local\entities\userenrolment;
 use core_reportbuilder\local\helpers\database;
-use core_reportbuilder\local\report\base as base_report;
 use lang_string;
 use moodle_url;
 
