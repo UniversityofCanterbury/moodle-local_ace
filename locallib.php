@@ -38,9 +38,15 @@ require_once($CFG->libdir . '/enrollib.php');
 function local_ace_teacher_course_graph(int $userid): string {
     global $PAGE;
 
+    $config = get_config('local_ace');
     $renderer = $PAGE->get_renderer('core');
     $output = $renderer->render_from_template('local_ace/teacher_course_engagement_chart', null);
-    $PAGE->requires->js_call_amd('local_ace/teacher_course_engagement', 'init');
+
+    $params = [
+        'colours' => explode(',', $config->colours),
+    ];
+
+    $PAGE->requires->js_call_amd('local_ace/teacher_course_engagement', 'init', [$params]);
     $PAGE->requires->css('/local/ace/styles.css');
     return $output;
 }
@@ -460,6 +466,7 @@ function local_ace_student_full_graph(int $userid, ?int $courseid = 0): string {
         'colourusercoursehistory' => $config->colourusercoursehistory,
         'colouruserhistory' => $config->colouruserhistory,
         'userid' => $userid,
+        'colours' => explode(',', $config->colours),
     );
 
     $renderer = $PAGE->get_renderer('core');

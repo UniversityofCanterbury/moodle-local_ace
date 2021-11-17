@@ -108,6 +108,11 @@ if ($hassiteconfig) {
             '^[a-zA-Z]+1[0-9]{1,2}-'
         ));
 
+        $settings->add(new admin_setting_configtext('local_ace/colours',
+            new lang_string('colours', 'local_ace'),
+            new lang_string('colours_desc', 'local_ace'),
+            '#2e2c2fff,#23c9ffff,#d64045ff,#729b79ff,#475b63ff,#467599ff,#1d3354ff,#37515fff'));
+
         $ADMIN->add('localplugins', $settings);
     }
 }

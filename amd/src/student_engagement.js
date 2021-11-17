@@ -36,10 +36,10 @@ let COMPARISON_OPTION = 'average-course-engagement';
 // Stores the current time method, allowing us to update the graph without supplying values.
 let START_TIME = null;
 let END_TIME = null;
-// Toggles the retrieval of a single course vs all courses enrolled in.
+// Toggles the retrieval of a single course vs all courses enrolleid in.
 let SHOW_ALL_COURSES = false;
-// Stores randomised colours against course shortnames.
-let COURSE_COLOUR_MATCH = [];
+
+let COLOURS = [];
 
 /**
  * Retrieves data from the local_ace webservice to populate an engagement graph
@@ -48,6 +48,7 @@ let COURSE_COLOUR_MATCH = [];
  */
 export const init = (parameters) => {
     USER_ID = parameters.userid;
+    COLOURS = parameters.colours;
     filtersInit(updateGraph);
 
     // Hide the 'Show all courses' button on every tab except 'Overall' (course=0).
@@ -181,16 +182,15 @@ const updateGraph = (startDatetime = START_TIME, endDateTime = END_TIME) => {
             let graphData = getGraphDataPlaceholder();
             graphData.legend_options.display = SHOW_ALL_COURSES;
             // Create individual series data.
+            let i = 0;
             response.data.forEach((data) => {
                 let series = getSeriesPlaceholder();
                 series.label = data.label;
                 series.values = data.values;
-                // Randomise the colour of courses.
                 if (SHOW_ALL_COURSES || data.colour === undefined) {
-                    if (!COURSE_COLOUR_MATCH[series.label]) {
-                        COURSE_COLOUR_MATCH[series.label] = parseInt(Math.random() * 0xffffff).toString(16);
-                    }
-                    series.colors = ['#' + COURSE_COLOUR_MATCH[series.label]];
+                    // Choose a colour from the array and wrap around when reaching the end.
+                    series.colors = [COLOURS[i % COLOURS.length]];
+                    i++;
                 } else {
                     series.colors = [data.colour];
                 }

@@ -31,14 +31,14 @@ import ChartJS from 'core/chartjs-lazy';
 import Templates from "core/templates";
 import {init as filtersInit} from 'local_ace/chart_filters';
 
-// Stores randomised colours against course shortnames.
-let COURSE_COLOUR_MATCH = [];
 // List of course shortnames hidden on the graph.
 let HIDDEN_COURSES = [];
 // List of courses that could be displayed on the graph, updated after fetching engagement data.
 let COURSES = [];
+let COLOURS = [];
 
-export const init = () => {
+export const init = (parameters) => {
+    COLOURS = parameters.colours;
     filtersInit(updateGraph);
     updateGraph(null, null);
 
@@ -98,16 +98,15 @@ const updateGraph = (startDate, endDate) => {
         let data = getGraphDataPlaceholder();
         // Reset courses list, stops us from showing courses that are no longer returned.
         COURSES = [];
+        let i = 0;
         response.series.forEach((series) => {
             COURSES.push({shortname: series.label});
-            // Store colours against courses so when switching history they stay the same colour.
-            if (!COURSE_COLOUR_MATCH[series.label]) {
-                COURSE_COLOUR_MATCH[series.label] = parseInt(Math.random() * 0xffffff).toString(16);
-            }
             let seriesData = getSeriesPlaceholder();
             seriesData.label = series.label;
             seriesData.values = series.values;
-            seriesData.colors = ['#' + COURSE_COLOUR_MATCH[series.label]];
+            // Choose a colour from the array and wrap around when reaching the end.
+            seriesData.colors = [COLOURS[i % COLOURS.length]];
+            i++;
             data.series.push(seriesData);
         });
         data.labels = response.xlabels;

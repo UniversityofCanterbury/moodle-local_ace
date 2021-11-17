@@ -72,6 +72,8 @@ $string['colouractivityengagement_desc'] = 'The colour used for the activity eng
 $string['courseregex'] = 'Course shortname regex';
 $string['courseregex_desc'] =
     'Regex to cover courses we want to be included in the analytics. The data entered here will be compared against the course shortname.';
+$string['colours'] = 'Engagement line colours';
+$string['colours_desc'] = 'Comma separated list of hex colour codes, preceded with a hash.';
 $string['userfooter'] =
     'This graph shows you how you\'re engaging in your courses compared to your classmates. This is automatically calculated every three days by reviewing your use of Learn and Echo360 (if relevant to your courses). The more you engage with these resources, the higher your engagement will be.';
 $string['high'] = 'High';
