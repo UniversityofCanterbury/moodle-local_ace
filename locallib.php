@@ -701,9 +701,9 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
             $series[] = 0;
         } else {
             if ($normalisevalues) {
-                $series[] = local_ace_normalise_value(($value->value / $value->count) * 100, $min, $max);
+                $series[] = round(local_ace_normalise_value(($value->value / $value->count) * 100, $min, $max));
             } else {
-                $series[] = ($value->value / $value->count) * 100;
+                $series[] = round(($value->value / $value->count) * 100);
             }
         }
 
@@ -712,11 +712,11 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
             $average2[] = 0;
         } else {
             if ($normalisevalues) {
-                $average1[] = local_ace_normalise_value(($value->avg - ($value->stddev / 2)) * 100, $min, $max);
-                $average2[] = local_ace_normalise_value(($value->avg + ($value->stddev / 2)) * 100, $min, $max);
+                $average1[] = round(local_ace_normalise_value(($value->avg - ($value->stddev / 2)) * 100, $min, $max));
+                $average2[] = round(local_ace_normalise_value(($value->avg + ($value->stddev / 2)) * 100, $min, $max));
             } else {
-                $average1[] = ($value->avg - ($value->stddev / 2)) * 100;
-                $average2[] = ($value->avg + ($value->stddev / 2)) * 100;
+                $average1[] = min(round(($value->avg - ($value->stddev / 2)) * 100), 100);
+                $average2[] = min(round(($value->avg + ($value->stddev / 2)) * 100), 100);
             }
         }
         // Make sure we don't show overlapping periods.
@@ -886,7 +886,7 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
  * @return float
  */
 function local_ace_normalise_value(float $value, float $min, float $max) {
-    return (($value - $min) / ($max - $min)) * 100;
+    return min((($value - $min) / ($max - $min)) * 100, $max);
 }
 
 /**
