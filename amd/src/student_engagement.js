@@ -57,6 +57,8 @@ export const init = (parameters) => {
         if (parseInt(params.get('course')) === 0) {
             document.querySelector('#show-courses-buttons').style.display = null;
         }
+    } else {
+        document.querySelector('#show-courses-buttons').style.display = null;
     }
 
     // Setup chart comparison control.
