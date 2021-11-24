@@ -682,6 +682,10 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
         }
     }
 
+    if ($max === 0) {
+        return get_string('noanalyticsfound', 'local_ace');
+    }
+
     foreach ($values as $value) {
         if (!empty($laststart) && $value->endtime > ($laststart + (DAYSECS))) {
             // If this period overlaps with the last week, skip it in the display.
