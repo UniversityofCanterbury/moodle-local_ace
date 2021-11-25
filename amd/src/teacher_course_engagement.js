@@ -111,7 +111,7 @@ const updateGraph = (startDate, endDate) => {
         });
         data.labels = response.xlabels;
         data.axes.y[0].max = 100;
-        data.axes.y[0].stepSize = 20;
+        data.axes.y[0].stepSize = 25;
         let yLabels = {};
         response.ylabels.forEach((element) => {
             yLabels[element.value] = element.label;

@@ -144,8 +144,6 @@ class user_analytics_graph extends external_api {
             'xlabels' => new external_multiple_structure(
                 new external_value(PARAM_TEXT, 'Formatted date string label'), 'X axis labels', false
             ),
-            'max' => new external_value(PARAM_FLOAT, 'Maximum engagement value', false),
-            'stepsize' => new external_value(PARAM_FLOAT, 'Engagement stepsize between Y labels', false),
             'ylabels' => new external_multiple_structure(
                 new external_single_structure([
                     'value' => new external_value(PARAM_FLOAT, 'Engagement Value'),

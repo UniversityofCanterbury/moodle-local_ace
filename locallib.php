@@ -85,10 +85,8 @@ function local_ace_enrolled_courses_user_data(int $userid, ?int $period = null, 
     list($series, $xlabels, $max) = local_ace_get_matching_values_to_labels($allvalues);
     $data['series'] = $series;
     $data['xlabels'] = $xlabels;
-    $data['max'] = $max;
-    $data['stepsize'] = ceil($max / 2);
 
-    $data['ylabels'] = local_ace_get_ylabels();
+    $data['ylabels'] = local_ace_get_percentage_ylabels();
 
     return $data;
 }
@@ -221,10 +219,8 @@ function local_ace_enrolled_courses_average_data(int $userid, ?int $period = nul
     list($series, $xlabels, $max) = local_ace_get_matching_values_to_labels($allvalues);
     $data['series'] = $series;
     $data['xlabels'] = $xlabels;
-    $data['max'] = $max;
-    $data['stepsize'] = ceil($max / 2);
 
-    $data['ylabels'] = local_ace_get_ylabels();
+    $data['ylabels'] = local_ace_get_percentage_ylabels();
 
     return $data;
 }
@@ -409,7 +405,7 @@ function local_ace_course_data(int $courseid, ?int $period = null, ?int $start =
         return get_string('noanalyticsfoundcourse', 'local_ace');
     }
 
-    $ylabels = local_ace_get_ylabels();
+    $ylabels = local_ace_get_percentage_ylabels();
 
     return array(
         'series' => array_reverse($series),
@@ -868,7 +864,7 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
         }
     }
 
-    $ylabels = local_ace_get_ylabels();
+    $ylabels = local_ace_get_percentage_ylabels();
 
     return array(
         'series' => $series,
@@ -954,39 +950,5 @@ function local_ace_get_percentage_ylabels(): array {
             'value' => 100,
             'label' => '100%'
         ],
-    ];
-}
-
-/**
- * Returns an array of the standard y-axis labels.
- *
- * @return array[]
- */
-function local_ace_get_ylabels(): array {
-    return [
-        [
-            'value' => 0,
-            'label' => get_string('none', 'local_ace')
-        ],
-        [
-            'value' => 20,
-            'label' => ''
-        ],
-        [
-            'value' => 40,
-            'label' => get_string('medium', 'local_ace')
-        ],
-        [
-            'value' => 60,
-            'label' => ''
-        ],
-        [
-            'value' => 80,
-            'label' => ''
-        ],
-        [
-            'value' => 100,
-            'label' => get_string('high', 'local_ace')
-        ]
     ];
 }

@@ -200,8 +200,8 @@ const updateGraph = (startDatetime = START_TIME, endDateTime = END_TIME) => {
                 graphData.series.push(series);
             });
             graphData.labels = response.xlabels;
-            graphData.axes.y[0].max = response.max;
-            graphData.axes.y[0].stepSize = response.stepsize;
+            graphData.axes.y[0].max = 100;
+            graphData.axes.y[0].stepSize = 25;
             let yLabels = {};
             response.ylabels.forEach((element) => {
                 yLabels[element.value] = element.label;
