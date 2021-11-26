@@ -1,0 +1,34 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_ace/bulk_email_selected
+
+    Modal body to enter a message that will be bulk emailed to users.
+
+    Example context (json):
+    {}
+}}
+<div>
+    <div class="form-group">
+        <label for="local_ace-email-subject">{{#str}}emailsubject, local_ace{{/str}}</label>
+        <input type="text" id="local_ace-email-subject" name="email-subject" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="local_ace-email-body">{{#str}}emailtext, local_ace{{/str}}</label>
+        <textarea id="local_ace-email-body" name="email-body" class="form-control" rows="10"></textarea>
+    </div>
+</div>

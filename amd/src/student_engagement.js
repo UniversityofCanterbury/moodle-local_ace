@@ -105,7 +105,7 @@ const createChartComparisonModal = function() {
     var modalPromise = ModalFactory.create({type: ModalFactory.types.SAVE_CANCEL});
 
     modalPromise.then(function(modal) {
-        modal.getRoot()[0].classList.add('chart-comparison-modal');
+        modal.getRoot()[0].classList.add('local_ace-slim-modal');
         modal.setTitle("Change course comparison data");
         let templatePromise = Templates.render('local_ace/chart_comparison_body', {});
         modal.setBody(templatePromise);

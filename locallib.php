@@ -888,39 +888,35 @@ function local_ace_normalise_value(float $value, float $min, float $max) {
 /**
  * Send bulk emails to users.
  *
- * @param array $userids - submitted user id's.
- * @param string $emailsubject - email subject.
- * @param string $messagehtml - email message.
- * @return bool
+ * @param array $userids submitted user id's.
+ * @param string $emailsubject email subject.
+ * @param string $messagehtml email message.
+ * @return int Number of emails sent
  */
-function local_ace_send_bulk_email($userids, $emailsubject, $messagehtml): bool {
+function local_ace_send_bulk_email(array $userids, string $emailsubject, string $messagehtml): int {
     global $DB;
 
+    $emailssent = 0;
     if (!empty($userids)) {
         foreach ($userids as $userid) {
             // Get user emails address from id.
             $userdata = $DB->get_record('user', array('id' => $userid));
-
             if (!$userdata) {
-                return false;
+                continue;
             }
 
             $fromuser = \core_user::get_support_user();
             if (!$fromuser) {
-                return false;
+                break;
             }
 
             $messagetext = html_to_text($messagehtml);
-
-            try {
-                email_to_user($userdata, $fromuser, $emailsubject, $messagetext, $messagehtml, '', '', true);
-                return true;
-            } catch (Exception $e) {
-                return false;
+            if (email_to_user($userdata, $fromuser, $emailsubject, $messagetext, $messagehtml)) {
+                $emailssent++;
             }
         }
     }
-    return false;
+    return $emailssent;
 }
 
 /**

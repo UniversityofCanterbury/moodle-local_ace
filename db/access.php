@@ -37,5 +37,10 @@ $capabilities = array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_USER,
         'archetypes' => array(),
-    )
+    ),
+    'local/ace:sendbulkemails' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array()
+    ),
 );

@@ -52,7 +52,7 @@ const courseFilter = () => {
     var modalPromise = ModalFactory.create({type: ModalFactory.types.SAVE_CANCEL});
 
     modalPromise.then(function(modal) {
-        modal.getRoot()[0].classList.add('chart-comparison-modal');
+        modal.getRoot()[0].classList.add('local_ace-slim-modal');
         modal.setTitle("Course filter");
         let templatePromise = Templates.render('local_ace/course_filter_modal', {courses: COURSES});
         modal.setBody(templatePromise);

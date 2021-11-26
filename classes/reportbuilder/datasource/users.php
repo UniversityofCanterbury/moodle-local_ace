@@ -137,6 +137,12 @@ class users extends datasource {
             $defaultfilter['userenrolment:lastaccess_to'] = $days7;
             $this->set_filter_values($defaultfilter);
         }
+
+        $this->add_action_button([
+            'id' => 'emailallselected',
+            'value' => get_string('bulkemailallselected', 'local_ace'),
+            'module' => 'local_ace/bulk_email'
+        ]);
     }
 
     /**
