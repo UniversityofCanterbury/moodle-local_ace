@@ -18,21 +18,10 @@ declare(strict_types=1);
 
 namespace local_ace\local\entities;
 
-use context_system;
-use html_writer;
 use lang_string;
 use moodle_url;
-use stdClass;
 use core_user\fields;
-use core_reportbuilder\local\filters\boolean_select;
-use core_reportbuilder\local\filters\date;
-use core_reportbuilder\local\filters\select;
-use core_reportbuilder\local\filters\text;
-use core_reportbuilder\local\filters\user as user_filter;
-use core_reportbuilder\local\helpers\user_profile_fields;
-use core_reportbuilder\local\helpers\format;
 use core_reportbuilder\local\report\column;
-use core_reportbuilder\local\report\filter;
 
 /**
  * User entity class implementation.

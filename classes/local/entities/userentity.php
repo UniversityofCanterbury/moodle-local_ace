@@ -18,20 +18,11 @@ declare(strict_types=1);
 
 namespace local_ace\local\entities;
 
-use Behat\Behat\Definition\Context\Annotation\DefinitionAnnotationReader;
-use context_system;
 use lang_string;
-use core_user\fields;
-use core_reportbuilder\local\filters\boolean_select;
-use core_reportbuilder\local\filters\date;
-use core_reportbuilder\local\filters\select;
 use core_reportbuilder\local\filters\text;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
 use core_reportbuilder\local\entities\base;
-use core_reportbuilder\local\entities\user;
-use moodle_url;
-use core_reportbuilder\local\report\base as base_report;
 
 /**
  * User entity class implementation.

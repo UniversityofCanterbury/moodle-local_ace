@@ -18,29 +18,12 @@ declare(strict_types=1);
 
 namespace local_ace\local\entities;
 
-use context_course;
-use context_system;
-use context_helper;
-use core_course_category;
-use core_reportbuilder\local\filters\boolean_select;
-use core_reportbuilder\local\filters\course_selector;
-use core_reportbuilder\local\filters\date;
-use core_reportbuilder\local\filters\select;
 use core_reportbuilder\local\filters\text;
-use core_reportbuilder\local\helpers\custom_fields;
 use core_reportbuilder\local\helpers\format;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
 use core_reportbuilder\local\entities\base;
-use core_user\fields;
-use core_reportbuilder\local\helpers\user_profile_fields;
-use core_reportbuilder\local\entities\user;
-use html_writer;
 use lang_string;
-use local_ace\local\filters\myenrolledcourses;
-use local_ace\local\filters\pagecontextcourse;
-use stdClass;
-use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
