@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace local_ace\reportbuilder\datasource;
 
 use core_reportbuilder\datasource;
-use core_reportbuilder\local\entities\user;
+use local_ace\local\entities\aceuser;
 use local_ace\local\entities\coursemodules;
 use local_ace\local\entities\userentity;
 use local_ace\local\entities\acesamples;
@@ -54,13 +54,12 @@ class users extends datasource {
         // Enrolment entity.
         $enrolmententity = new userenrolment();
         $uetablealias = $enrolmententity->get_table_alias('user_enrolments');
-        $enrolalias = $enrolmententity->get_table_alias('enrol');
 
         $this->set_main_table('user_enrolments', $uetablealias);
         $this->add_entity($enrolmententity);
 
         // Add core user join.
-        $usercore = new user();
+        $usercore = new aceuser();
         $usercorealias = $usercore->get_table_alias('user');
         $usercorejoin = "JOIN {user} {$usercorealias} ON {$usercorealias}.id = {$uetablealias}.userid";
         $this->add_entity($usercore->add_join($usercorejoin));
@@ -77,10 +76,8 @@ class users extends datasource {
         // Join the custom user entity to the table too.
         $userentity = new userentity();
         $usertablealias = $userentity->get_table_alias('user');
-        $coursealias = $userentity->get_table_alias('course');
 
-        $userentityjoin = "JOIN {user} {$usertablealias} ON {$usertablealias}.id = {$uetablealias}.userid
-                           AND {$coursealias}.id = {$enrolalias}.courseid";
+        $userentityjoin = "JOIN {user} {$usertablealias} ON {$usertablealias}.id = {$uetablealias}.userid";
         $this->add_entity($userentity->add_join($userentityjoin));
 
         // Add Ace samples entity.
@@ -165,6 +162,6 @@ class users extends datasource {
      * @return string[]
      */
     public function get_default_conditions(): array {
-        return ['user:fullname', 'user:username', 'user:email'];
+        return ['aceuser:fullnamedashboardlink'];
     }
 }

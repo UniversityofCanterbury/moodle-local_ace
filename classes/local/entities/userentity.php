@@ -115,31 +115,6 @@ class userentity extends base {
 
         $daysago7 = time() - (DAYSECS * 7);
         $daysago30 = time() - (DAYSECS * 30);
-        $viewfullnames = user::get_name_fields_select($usertablealias);
-        // Fullname column.
-        $columns[] = (new column(
-            'fullnamedashboardlink',
-            new lang_string('fullnamedasboardlink', 'local_ace'),
-            $this->get_entity_name()
-        ))
-            ->add_joins($this->get_joins())
-            ->add_fields($viewfullnames)
-            ->add_field("{$usertablealias}.id")
-            ->set_type(column::TYPE_TEXT)
-            ->set_is_sortable(true)
-            ->add_callback(static function(?string $value, \stdClass $row) use ($viewfullnames): string {
-                if ($value === null) {
-                    return '';
-                }
-
-                // Ensure we populate all required name properties.
-                $namefields = fields::get_name_fields();
-                foreach ($namefields as $namefield) {
-                    $row->{$namefield} = $row->{$namefield} ?? '';
-                }
-                $url = new moodle_url('/local/ace/goto.php', ['userid' => $row->id]);
-                return \html_writer::link($url, fullname($row, $viewfullnames));
-            });
 
         // TODO: This is not a very clean join - we should tidy it up and split it.
         $join = "JOIN {user_enrolments} {$userenrolmentsalias} ON {$userenrolmentsalias}.userid = {$usertablealias}.id
@@ -232,29 +207,6 @@ class userentity extends base {
             'username' => new lang_string('username'),
             'moodlenetprofile' => new lang_string('moodlenetprofile', 'user'),
         ];
-    }
-
-    /**
-     * Return appropriate column type for given user field
-     *
-     * @param string $userfield
-     * @return int
-     */
-    protected function get_user_field_type(string $userfield): int {
-        switch ($userfield) {
-            case 'confirmed':
-            case 'suspended':
-                $fieldtype = column::TYPE_BOOLEAN;
-                break;
-            case 'lastaccess':
-                $fieldtype = column::TYPE_TIMESTAMP;
-                break;
-            default:
-                $fieldtype = column::TYPE_TEXT;
-                break;
-        }
-
-        return $fieldtype;
     }
 
     /**
