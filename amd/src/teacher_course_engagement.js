@@ -27,7 +27,6 @@ import ChartJSOutput from 'core/chart_output_chartjs';
 import Notification from 'core/notification';
 import ModalFactory from 'core/modal_factory';
 import ModalEvents from "core/modal_events";
-import ChartJS from 'core/chartjs-lazy';
 import Templates from "core/templates";
 import {init as filtersInit} from 'local_ace/chart_filters';
 
@@ -135,7 +134,7 @@ const updateGraph = (startDate, endDate) => {
         let chartImage = chartArea.querySelector('.chart-image');
         chartImage.innerHTML = "";
         ChartBuilder.make(data).then((chart) => {
-            new ChartJSOutput(chartImage, chart);
+            let chartoutput = new ChartJSOutput(chartImage, chart);
 
             // Hides courses based on user preferences.
             getHiddenCourses().then(response => {
@@ -148,16 +147,14 @@ const updateGraph = (startDate, endDate) => {
                 }
                 HIDDEN_COURSES.push(courseList.split(","));
                 // This gets all chartjs instances on the page, there is no filtering of non teacher course engagement charts.
-                ChartJS.helpers.each(ChartJS.instances, function(instance) {
-                    let chart = instance.chart;
-                    for (let dataset in chart.data.datasets) {
-                        let datasetObject = chart.data.datasets[dataset];
-                        if (HIDDEN_COURSES.includes(datasetObject.label)) {
-                            datasetObject.hidden = true;
-                        }
+                let chartjs = chartoutput._chartjs;
+                for (let dataset in chartjs.data.datasets) {
+                    let datasetObject = chartjs.data.datasets[dataset];
+                    if (HIDDEN_COURSES.includes(datasetObject.label)) {
+                        datasetObject.hidden = true;
                     }
-                    chart.update();
-                });
+                }
+                chartjs.update();
                 return;
             }).fail(Notification.exception);
             return;
