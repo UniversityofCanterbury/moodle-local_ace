@@ -24,6 +24,7 @@ use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
 use core_reportbuilder\local\entities\base;
 use lang_string;
+use local_ace\local\filters\coursemoduletype;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -230,6 +231,7 @@ class coursemodules extends base {
     protected function get_all_filters(): array {
 
         $filters = [];
+        $cmalias = $this->get_table_alias('course_modules');
         $modulesalias = $this->get_table_alias('modules');
 
         // Module name filter.
@@ -241,6 +243,14 @@ class coursemodules extends base {
             "{$modulesalias}.name"
         ))
             ->add_joins($this->get_joins());
+
+        $filters[] = (new filter(
+            coursemoduletype::class,
+            'moduletype',
+            new lang_string('moduletype', 'local_ace'),
+            $this->get_entity_name(),
+            "{$cmalias}.module"
+        ))->add_joins($this->get_joins());
 
         return $filters;
     }
