@@ -985,10 +985,12 @@ function local_ace_get_course_helper() {
         strpos($referrer, $CFG->wwwroot.'/local/vxg_dashboard/index.php') === 0) {
 
         $urlcomponents = parse_url($referrer);
-        parse_str($urlcomponents['query'], $params);
-        if (!empty($params['course']) && $params['course'] != SITEID) {
-            $course = get_course((int)$params['course']);
-            return $course;
+        if (!empty($urlcomponents['query'])) {
+            parse_str($urlcomponents['query'], $params);
+            if (!empty($params['course']) && $params['course'] != SITEID) {
+                $course = get_course((int)$params['course']);
+                return $course;
+            }
         }
     }
     return false;
