@@ -20,7 +20,7 @@ namespace local_ace\reportbuilder\datasource;
 
 use core_reportbuilder\datasource;
 use local_ace\local\entities\coursemodules;
-use local_ace\local\entities\course;
+use core_reportbuilder\local\helpers\database;
 
 /**
  * Users datasource
@@ -44,12 +44,22 @@ class activity extends datasource {
      * Initialise report
      */
     protected function initialise(): void {
+        global $CFG;
+        require_once($CFG->dirroot.'/local/ace/locallib.php');
+
         $activityentity = new coursemodules();
         $coursemodulealias = $activityentity->get_table_alias('course_modules');
 
         $this->set_main_table('course_modules', $coursemodulealias);
 
         $this->add_entity($activityentity);
+        $course = local_ace_get_course_from_url_or_refer();
+        if (can_access_course($course)) {
+            $fieldvalueparam = database::generate_param_name();
+            $this->add_base_condition_sql("{$coursemodulealias}.course = :{$fieldvalueparam}", [$fieldvalueparam => $course->id]);
+        } else {
+            $this->add_base_condition_sql("{$coursemodulealias}.course is null");
+        }
 
         $userentityname = $activityentity->get_entity_name();
         $this->add_columns_from_entity($userentityname);

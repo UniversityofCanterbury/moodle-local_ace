@@ -948,3 +948,36 @@ function local_ace_get_percentage_ylabels(): array {
         ],
     ];
 }
+
+/**
+ * Nasty hack function to get the course from either the referring page (called by webservice) or from optional_param.
+ *
+ * @return false|stdClass
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function local_ace_get_course_from_url_or_refer() {
+    global $CFG, $COURSE;
+    // Check if loaded in current url.
+    $courseid = optional_param('course', '0', PARAM_INT);
+    if (!empty($courseid) && $courseid != SITEID) {
+        $course = get_course($courseid);
+        return $course;
+    }
+    // Check if set by course global.
+    if (!empty($COURSE) && $COURSE->id != SITEID) {
+        return $COURSE;
+    }
+    // Check if set in HTTP_REFERRER - will be a webservice call from the dashboard page.
+    if (!empty($_SERVER['HTTP_REFERER']) &&
+        strpos($_SERVER['HTTP_REFERER'], $CFG->wwwroot.'/local/vxg_dashboard/index.php') === 0) {
+
+        $urlcomponents = parse_url($_SERVER['HTTP_REFERER']);
+        parse_str($urlcomponents['query'], $params);
+        if (!empty($params['course']) && $params['course'] != SITEID) {
+            $course = get_course($params['course']);
+            return $course;
+        }
+    }
+    return false;
+}
