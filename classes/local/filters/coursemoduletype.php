@@ -53,6 +53,9 @@ class coursemoduletype extends \core_reportbuilder\local\filters\base {
      * @return array  array of two elements - SQL query and named parameters
      */
     public function get_sql_filter(array $values): array {
+        if (!$values) {
+            return ['', []];
+        }
         $modules = $values["{$this->name}_modules"];
         if (!empty($modules)) {
             $fieldsql = $this->filter->get_field_sql();

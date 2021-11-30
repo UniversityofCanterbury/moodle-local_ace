@@ -139,3 +139,4 @@ $string['coursedashboardurl'] = 'Course dashboard url';
 $string['coursedashboardurl_desc'] = 'The main course dashboard url';
 $string['courseshortnamedashboardlink'] = 'Course shortname with dashboard link';
 $string['courseregex'] = 'ACE course regex';
+$string['moduletype'] = 'Course Module Type';
