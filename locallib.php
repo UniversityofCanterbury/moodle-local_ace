@@ -968,14 +968,15 @@ function local_ace_get_course_from_url_or_refer() {
     if (!empty($COURSE) && $COURSE->id != SITEID) {
         return $COURSE;
     }
+    $referrer = get_local_referer(false);
     // Check if set in HTTP_REFERRER - will be a webservice call from the dashboard page.
-    if (!empty($_SERVER['HTTP_REFERER']) &&
-        strpos($_SERVER['HTTP_REFERER'], $CFG->wwwroot.'/local/vxg_dashboard/index.php') === 0) {
+    if (!empty($referrer) &&
+        strpos($referrer, $CFG->wwwroot.'/local/vxg_dashboard/index.php') === 0) {
 
-        $urlcomponents = parse_url($_SERVER['HTTP_REFERER']);
+        $urlcomponents = parse_url($referrer);
         parse_str($urlcomponents['query'], $params);
         if (!empty($params['course']) && $params['course'] != SITEID) {
-            $course = get_course($params['course']);
+            $course = get_course((int)$params['course']);
             return $course;
         }
     }
