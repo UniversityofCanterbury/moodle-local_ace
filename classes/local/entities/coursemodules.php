@@ -31,6 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/local/ace/lib.php');
+require_once($CFG->dirroot.'/local/ace/locallib.php');
 
 /**
  * Course entity class implementation
