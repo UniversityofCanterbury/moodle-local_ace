@@ -107,7 +107,12 @@ class coursemodules extends base {
         global $USER, $PAGE;
         // Note this custom report source is restricted to showing activities.
         $course = local_ace_get_course_from_url_or_refer();
-        $courseid = $course->id;
+        if (!empty($course)) {
+            $courseid = $course->id;
+        } else {
+            $courseid = 0; // Should not happen when using this entity correctly, set to 0 to prevent SQL dying.
+        }
+
         // Determine which user to use within the user specific columns - use $PAGE->context if user context or global $USER.
         $userid = $USER->id;
         if (!empty($PAGE->context) && $PAGE->context->contextlevel == CONTEXT_USER) {
