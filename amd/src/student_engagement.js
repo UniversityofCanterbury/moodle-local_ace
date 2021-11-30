@@ -221,7 +221,12 @@ const updateGraph = (startDatetime = START_TIME, endDateTime = END_TIME) => {
         let chartImage = chartArea.querySelector('.chart-image');
         chartImage.innerHTML = "";
         ChartBuilder.make(data).then((chart) => {
-            new ChartJSOutput(chartImage, chart);
+            // Render graph
+            let chartoutput = new ChartJSOutput(chartImage, chart);
+            // Disable autoskip on x axis.
+            let chartjs = chartoutput._chartjs;
+            chartjs.options.scales.xAxes[0].ticks.minor.autoSkip = false;
+            chartjs.update();
             return;
         }).catch();
         return;
