@@ -53,7 +53,7 @@ class activity extends datasource {
         $this->set_main_table('course_modules', $coursemodulealias);
 
         $this->add_entity($activityentity);
-        $course = local_ace_get_course_from_url_or_refer();
+        $course = local_ace_get_course_helper();
         if (!empty($course) && can_access_course($course)) {
             $fieldvalueparam = database::generate_param_name();
             $this->add_base_condition_sql("{$coursemodulealias}.course = :{$fieldvalueparam}", [$fieldvalueparam => $course->id]);

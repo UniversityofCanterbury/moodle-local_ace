@@ -956,20 +956,31 @@ function local_ace_get_percentage_ylabels(): array {
  * @throws coding_exception
  * @throws dml_exception
  */
-function local_ace_get_course_from_url_or_refer() {
-    global $CFG, $COURSE;
+function local_ace_get_course_helper() {
+    global $CFG, $COURSE, $PAGE;
+
     // Check if loaded in current url.
     $courseid = optional_param('course', '0', PARAM_INT);
     if (!empty($courseid) && $courseid != SITEID) {
         $course = get_course($courseid);
         return $course;
     }
+
     // Check if set by course global.
     if (!empty($COURSE) && $COURSE->id != SITEID) {
         return $COURSE;
     }
+
+    // See if $PAGE is set, and if it relates to a course context.
+    if (!empty($PAGE)) {
+        $coursecontext = $PAGE->context->get_course_context(false);
+        if (!empty($coursecontext) && !empty($coursecontext->instanceid) && $coursecontext->instanceid != SITEID) {
+            return get_course($coursecontext->instanceid);
+        }
+    }
+
+    // Finally check if set in HTTP_REFERRER - will be a webservice call from the dashboard page.
     $referrer = get_local_referer(false);
-    // Check if set in HTTP_REFERRER - will be a webservice call from the dashboard page.
     if (!empty($referrer) &&
         strpos($referrer, $CFG->wwwroot.'/local/vxg_dashboard/index.php') === 0) {
 

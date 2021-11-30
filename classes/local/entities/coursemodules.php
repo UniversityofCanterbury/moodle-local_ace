@@ -106,7 +106,7 @@ class coursemodules extends base {
     protected function get_all_columns(): array {
         global $USER, $PAGE;
         // Note this custom report source is restricted to showing activities.
-        $course = local_ace_get_course_from_url_or_refer();
+        $course = local_ace_get_course_helper();
         if (!empty($course)) {
             $courseid = $course->id;
         } else {
@@ -117,13 +117,8 @@ class coursemodules extends base {
         $userid = $USER->id;
         if (!empty($PAGE->context) && $PAGE->context->contextlevel == CONTEXT_USER) {
             $userid = $PAGE->context->instanceid;
-        } else if (!empty($PAGE) &&
-            $PAGE->state != \moodle_page::STATE_BEFORE_HEADER ) { // When building a report $PAGE doesn't really exist.
-            $coursecontext = $PAGE->context->get_course_context(false);
-            if (!empty($coursecontext)) {
-                $courseid = $coursecontext->instanceid;
-            }
         }
+
         $cmalias = $this->get_table_alias('course_modules');
         $modulesalias = $this->get_table_alias('modules');
         $totalviewcountalias = $this->get_table_alias('totalviewcount');
