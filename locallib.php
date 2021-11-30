@@ -973,10 +973,16 @@ function local_ace_get_course_helper() {
 
     // See if $PAGE is set, and if it relates to a course context.
     if (!empty($PAGE)) {
-        $coursecontext = $PAGE->context->get_course_context(false);
-        if (!empty($coursecontext) && !empty($coursecontext->instanceid) && $coursecontext->instanceid != SITEID) {
-            return get_course($coursecontext->instanceid);
+        try { // Don't trigger an exception if we can't get a coursecontext.
+            $coursecontext = $PAGE->context->get_course_context(false);
+            if (!empty($coursecontext) && !empty($coursecontext->instanceid) && $coursecontext->instanceid != SITEID) {
+                return get_course($coursecontext->instanceid);
+            }
+            // @codingStandardsIgnoreStart
+        } catch (coding_exception $e) {
+            // We get the course another way below.
         }
+        // @codingStandardsIgnoreEnd
     }
 
     // Finally check if set in HTTP_REFERRER - will be a webservice call from the dashboard page.
