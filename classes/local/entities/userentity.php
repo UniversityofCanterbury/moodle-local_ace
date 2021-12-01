@@ -79,13 +79,6 @@ class userentity extends base {
             $this->add_column($column);
         }
 
-        $filters = $this->get_all_filters();
-        foreach ($filters as $filter) {
-            $this
-                ->add_filter($filter)
-                ->add_condition($filter);
-        }
-
         return $this;
     }
 
@@ -195,47 +188,6 @@ class userentity extends base {
             'username' => new lang_string('username'),
             'moodlenetprofile' => new lang_string('moodlenetprofile', 'user'),
         ];
-    }
-
-    /**
-     * Return list of all available filters
-     *
-     * @return filter[]
-     */
-    protected function get_all_filters(): array {
-        $filters = [];
-
-        // Last 7 days filter.
-        $filters[] = (new filter(
-            text::class,
-            'log7',
-            new lang_string('last7', 'local_ace'),
-            $this->get_entity_name(),
-            "{$this->logstorealias1}.last7"
-        ))
-            ->add_joins($this->get_joins());
-
-        // Last 30 days filter.
-        $filters[] = (new filter(
-            text::class,
-            'last30',
-            new lang_string('last30', 'local_ace'),
-            $this->get_entity_name(),
-            "{$this->logstorealias2}.last30"
-        ))
-            ->add_joins($this->get_joins());
-
-        // All accesses filter.
-        $filters[] = (new filter(
-            text::class,
-            'logtotal',
-            new lang_string('totalaccess', 'local_ace'),
-            $this->get_entity_name(),
-            "{$this->logstorealias3}.total"
-        ))
-            ->add_joins($this->get_joins());
-
-        return $filters;
     }
 
     /**
