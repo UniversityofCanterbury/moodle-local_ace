@@ -24,6 +24,7 @@ use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
 use html_writer;
 use lang_string;
+use local_ace\local\filters\courseselect;
 use stdClass;
 use moodle_url;
 use local_ace\local\filters\pagecontextcourse;
@@ -111,6 +112,14 @@ class acecourse extends \core_reportbuilder\local\entities\course {
             "{$tablealias}.shortname"
         ))
             ->add_joins($this->get_joins());
+
+        $filters[] = (new filter(
+            courseselect::class,
+            'courseselect',
+            new lang_string('courseselect', 'local_ace'),
+            $this->get_entity_name(),
+            "{$tablealias}.id"
+        ))->add_joins($this->get_joins());
 
         return $filters;
     }
