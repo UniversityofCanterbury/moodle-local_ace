@@ -73,15 +73,13 @@ class users extends datasource {
 
         $this->add_entity($courseentity->add_join($coursejoin));
 
-        // Join the custom user entity to the table too.
+        // Add the user entity for the last X days columns.
         $userentity = new userentity();
-        $usertablealias = $userentity->get_table_alias('user');
-
-        $userentityjoin = "JOIN {user} {$usertablealias} ON {$usertablealias}.id = {$uetablealias}.userid";
-        $this->add_entity($userentity->add_join($userentityjoin));
+        $this->add_entity($userentity->add_join($coursejoin));
 
         // Add Ace samples entity.
         $acesamplesentity = new acesamples();
+        $usertablealias = $userentity->get_table_alias('user');
         $acesamplesalias = $acesamplesentity->get_table_alias('local_ace_samples');
         $acesamplejoin = "LEFT JOIN {local_ace_samples} {$acesamplesalias}
                           ON {$acesamplesalias}.userid = {$usertablealias}.id

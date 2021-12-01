@@ -18,11 +18,11 @@ declare(strict_types=1);
 
 namespace local_ace\local\entities;
 
-use lang_string;
+use core_reportbuilder\local\entities\base;
 use core_reportbuilder\local\filters\text;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
-use core_reportbuilder\local\entities\base;
+use lang_string;
 
 /**
  * User entity class implementation.
@@ -36,23 +36,22 @@ use core_reportbuilder\local\entities\base;
 class userentity extends base {
 
     /**
+     * Two custom aliases for the logstore_standard_log table as we can't define multiple per entity using the API
+     */
+    /** @var string */
+    private $logstorealias1 = "lsls1";
+    /** @var string */
+    private $logstorealias2 = "lsls2";
+
+    /**
      * Database tables that this entity uses and their default aliases
      *
      * @return array
      */
     protected function get_default_table_aliases(): array {
         return [
-            'user' => 'aceu',
-            'enrol' => 'aceue',
-            'user_enrolments' => 'aceuue',
-            'user_lastaccess' => 'aceuul',
-            'course' => 'uc',
-            'course_modules' => 'ucm',
-            'modules' => 'um',
-            'assign' => 'ua',
-            'assign_submission' => 'uas',
-            'logstore_standard_log' => 'ulsl',
-            'context' => 'uctx',
+            'user' => 'u',
+            'course' => 'c',
         ];
     }
 
@@ -65,11 +64,11 @@ class userentity extends base {
         return new lang_string('userentitytitle', 'local_ace');
     }
 
-     /**
-      * Initialise the entity, add all user fields and all 'visible' user profile fields
-      *
-      * @return base
-      */
+    /**
+     * Initialise the entity, add all user fields and all 'visible' user profile fields
+     *
+     * @return base
+     */
     public function initialise(): base {
 
         $columns = $this->get_all_columns();
@@ -95,41 +94,27 @@ class userentity extends base {
      * @return column[]
      */
     protected function get_all_columns(): array {
-
-        $usertablealias = $this->get_table_alias('user');
-        $userenrolmentsalias = $this->get_table_alias('user_enrolments');
-        $coursealias = $this->get_table_alias('course');
-        $enrolalias = $this->get_table_alias('enrol');
-        $contexttablealias = $this->get_table_alias('context');
-        $logstorealiassub1 = 'logs_sub_select_1';
-        $logstorealiassub2 = 'logs_sub_select_2';
-
         $daysago7 = time() - (DAYSECS * 7);
         $daysago30 = time() - (DAYSECS * 30);
 
-        // TODO: This is not a very clean join - we should tidy it up and split it.
-        $join = "JOIN {user_enrolments} {$userenrolmentsalias} ON {$userenrolmentsalias}.userid = {$usertablealias}.id
-                 JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid
-                 JOIN {course} {$coursealias} ON {$enrolalias}.courseid = {$coursealias}.id
-                 JOIN {context} {$contexttablealias} ON {$contexttablealias}.contextlevel = " . CONTEXT_COURSE . "
-                      AND {$contexttablealias}.instanceid = {$coursealias}.id";
-        $this->add_join($join);
+        $usertablealias = $this->get_table_alias('user');
+        $coursealias = $this->get_table_alias('course');
 
-        $join7day = "LEFT JOIN (
-                    SELECT contextid, userid, max(timecreated) AS maxtimecreated, COUNT(*) AS last7
-                      FROM {logstore_standard_log}
-                     WHERE timecreated > $daysago7
-                  GROUP BY contextid, userid) AS {$logstorealiassub1}
-                   ON {$logstorealiassub1}.contextid = {$contexttablealias}.id
-                   AND {$logstorealiassub1}.userid = {$usertablealias}.id";
+        $join7days = "JOIN (
+                           SELECT courseid, userid, COUNT(*) as last7
+                               FROM {logstore_standard_log}
+                           WHERE timecreated > $daysago7
+                           GROUP BY courseid, userid) AS {$this->logstorealias1}
+                       ON {$this->logstorealias1}.courseid = {$coursealias}.id
+                       AND {$this->logstorealias1}.userid = {$usertablealias}.id";
 
-        $join30day = "LEFT JOIN (
-                    SELECT contextid, COUNT(*) AS last30
-                      FROM {logstore_standard_log}
-                     WHERE timecreated > $daysago30
-                  GROUP BY contextid, userid) AS {$logstorealiassub2}
-                   ON {$logstorealiassub2}.contextid = {$contexttablealias}.id
-                   AND {$logstorealiassub1}.userid = {$usertablealias}.id";
+        $join30days = "JOIN (
+                           SELECT courseid, userid, COUNT(*) as last30
+                               FROM {logstore_standard_log}
+                           WHERE timecreated > $daysago30
+                           GROUP BY courseid, userid) AS {$this->logstorealias2}
+                       ON {$this->logstorealias2}.courseid = {$coursealias}.id
+                       AND {$this->logstorealias2}.userid = {$usertablealias}.id";
 
         $this->add_selectable_column('u');
 
@@ -140,10 +125,10 @@ class userentity extends base {
             $this->get_entity_name()
         ))
             ->add_joins($this->get_joins())
-            ->add_join($join7day)
+            ->add_join($join7days)
             ->set_is_sortable(true)
-            ->add_field("$logstorealiassub1.last7")
-            ->add_callback(static function ($value): string {
+            ->add_field("{$this->logstorealias1}.last7")
+            ->add_callback(static function($value): string {
                 if (!$value) {
                     return '0';
                 }
@@ -157,10 +142,10 @@ class userentity extends base {
             $this->get_entity_name()
         ))
             ->add_joins($this->get_joins())
-            ->add_join($join30day)
+            ->add_join($join30days)
             ->set_is_sortable(true)
-            ->add_fields("$logstorealiassub2.last30")
-            ->add_callback(static function ($value): string {
+            ->add_fields("{$this->logstorealias2}.last30")
+            ->add_callback(static function($value): string {
                 if (!$value) {
                     return '0';
                 }
@@ -208,27 +193,23 @@ class userentity extends base {
     protected function get_all_filters(): array {
         $filters = [];
 
-        $enrolalias = $this->get_table_alias('enrol');
-        $logstorealiassub1 = 'logs_sub_select_1';
-        $logstorealiassub2 = 'logs_sub_select_2';
-
-        // End Time  filter.
+        // Last 7 days filter.
         $filters[] = (new filter(
             text::class,
             'log7',
             new lang_string('last7', 'local_ace'),
             $this->get_entity_name(),
-            "$logstorealiassub1.last7"
+            "{$this->logstorealias1}.last7"
         ))
             ->add_joins($this->get_joins());
 
-                // End Time  filter.
+        // Last 30 days filter.
         $filters[] = (new filter(
             text::class,
             'last30',
             new lang_string('last30', 'local_ace'),
             $this->get_entity_name(),
-            "$logstorealiassub2.last30"
+            "{$this->logstorealias2}.last30"
         ))
             ->add_joins($this->get_joins());
 
