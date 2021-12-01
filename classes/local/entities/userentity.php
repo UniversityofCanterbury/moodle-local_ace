@@ -36,12 +36,15 @@ use lang_string;
 class userentity extends base {
 
     /**
-     * Two custom aliases for the logstore_standard_log table as we can't define multiple per entity using the API
+     * Three custom aliases for the logstore_standard_log table as we can't define multiple per entity using the API.
+     * We need separate aliases for each in case the multiple columns are added to the same report.
      */
     /** @var string */
     private $logstorealias1 = "lsls1";
     /** @var string */
     private $logstorealias2 = "lsls2";
+    /** @var string */
+    private $logstorealias3 = "lsls3";
 
     /**
      * Database tables that this entity uses and their default aliases
@@ -116,6 +119,13 @@ class userentity extends base {
                        ON {$this->logstorealias2}.courseid = {$coursealias}.id
                        AND {$this->logstorealias2}.userid = {$usertablealias}.id";
 
+        $jointotal = "JOIN (
+                           SELECT courseid, userid, COUNT(*) as total
+                               FROM {logstore_standard_log}
+                           GROUP BY courseid, userid) AS {$this->logstorealias3}
+                       ON {$this->logstorealias3}.courseid = {$coursealias}.id
+                       AND {$this->logstorealias3}.userid = {$usertablealias}.id";
+
         $this->add_selectable_column('u');
 
         // Last access in 7 days column.
@@ -128,12 +138,7 @@ class userentity extends base {
             ->add_join($join7days)
             ->set_is_sortable(true)
             ->add_field("{$this->logstorealias1}.last7")
-            ->add_callback(static function($value): string {
-                if (!$value) {
-                    return '0';
-                }
-                return $value;
-            });
+            ->add_callback([$this, 'cleanup_log_Value']);
 
         // Last access in 30 days column.
         $columns[] = (new column(
@@ -145,12 +150,19 @@ class userentity extends base {
             ->add_join($join30days)
             ->set_is_sortable(true)
             ->add_fields("{$this->logstorealias2}.last30")
-            ->add_callback(static function($value): string {
-                if (!$value) {
-                    return '0';
-                }
-                return $value;
-            });
+            ->add_callback([$this, 'cleanup_log_Value']);
+
+        // All accesses column.
+        $columns[] = (new column(
+            'logtotal',
+            new lang_string('totalaccess', 'local_ace'),
+            $this->get_entity_name()
+        ))
+            ->add_joins($this->get_joins())
+            ->add_join($jointotal)
+            ->set_is_sortable(true)
+            ->add_fields("{$this->logstorealias3}.total")
+            ->add_callback([$this, 'cleanup_log_Value']);
 
         return $columns;
     }
@@ -213,6 +225,29 @@ class userentity extends base {
         ))
             ->add_joins($this->get_joins());
 
+        // All accesses filter.
+        $filters[] = (new filter(
+            text::class,
+            'logtotal',
+            new lang_string('totalaccess', 'local_ace'),
+            $this->get_entity_name(),
+            "{$this->logstorealias3}.total"
+        ))
+            ->add_joins($this->get_joins());
+
         return $filters;
+    }
+
+    /**
+     * Used to show zero values on access count columns.
+     *
+     * @param string|null $value
+     * @return string
+     */
+    public function cleanup_log_value(?string $value): string {
+        if (!$value) {
+            return '0';
+        }
+        return $value;
     }
 }

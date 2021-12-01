@@ -37,6 +37,7 @@ $string['lastaccessedtocourse'] = 'Last access to course';
 $string['numofaccess'] = 'Number of accesses';
 $string['last7'] = 'Accesses in last 7 days';
 $string['last30'] = 'Accesses in last 30 days';
+$string['totalaccess'] = 'Count of all recorded accesses';
 $string['noanalytics'] = 'No analytics were found.';
 $string['noanalyticsfound'] = 'No analytics were found.';
 $string['ace:viewown'] = 'View own analytics';
