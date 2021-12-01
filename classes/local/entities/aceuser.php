@@ -33,6 +33,18 @@ use core_reportbuilder\local\report\column;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class aceuser extends \core_reportbuilder\local\entities\user {
+
+    /**
+     * Database tables that this entity uses and their default aliases
+     *
+     * @return array
+     */
+    protected function get_default_table_aliases(): array {
+        $aliases = parent::get_default_table_aliases();
+        $aliases['course'] = 'c';
+        return $aliases;
+    }
+
     /**
      * Get all columns
      * @return array
@@ -41,6 +53,7 @@ class aceuser extends \core_reportbuilder\local\entities\user {
         $columns = parent::get_all_columns();
 
         $usertablealias = $this->get_table_alias('user');
+        $coursetablealias = $this->get_table_alias('course');
         $viewfullnames = self::get_name_fields_select($usertablealias);
         // Fullname column.
         $columns[] = (new column(
@@ -51,6 +64,7 @@ class aceuser extends \core_reportbuilder\local\entities\user {
             ->add_joins($this->get_joins())
             ->add_fields($viewfullnames)
             ->add_field("{$usertablealias}.id")
+            ->add_field("{$coursetablealias}.id", 'courseid')
             ->set_type(column::TYPE_TEXT)
             ->set_is_sortable(true)
             ->add_callback(static function(?string $value, \stdClass $row) use ($viewfullnames): string {
@@ -63,7 +77,7 @@ class aceuser extends \core_reportbuilder\local\entities\user {
                 foreach ($namefields as $namefield) {
                     $row->{$namefield} = $row->{$namefield} ?? '';
                 }
-                $url = new moodle_url('/local/ace/goto.php', ['userid' => $row->id]);
+                $url = new moodle_url('/local/ace/goto.php', ['userid' => $row->id, 'course' => $row->courseid]);
                 return \html_writer::link($url, fullname($row, $viewfullnames));
             });
 
