@@ -162,7 +162,7 @@ const updateGraph = (startDatetime = START_TIME, endDateTime = END_TIME) => {
 
     let url = new URL(window.location.href);
     let params = new URLSearchParams(url.search);
-    let courseid = null;
+    let courseid = 0;
     if (params.has('course')) {
         courseid = parseInt(params.get('course'));
     }
