@@ -427,7 +427,7 @@ function local_ace_course_data(int $courseid, ?int $period = null, ?int $start =
 function local_ace_student_full_graph(int $userid, ?int $courseid = 0): string {
     global $PAGE, $OUTPUT;
 
-    list($courseid, $courses) = local_ace_get_user_courses($userid, $courseid);
+    list($courseid, $courses) = local_ace_get_user_courses($userid, $courseid, true);
 
     $config = get_config('local_ace');
 
@@ -482,11 +482,12 @@ function local_ace_student_full_graph(int $userid, ?int $courseid = 0): string {
  *
  * @param int $userid
  * @param int|null $courseid
+ * @param bool $ignoreanalytics When true the condition for requiring analytics data is removed
  * @return array array[0] = int (courseid) and array[1] = array (courses)
  * @throws coding_exception
  * @throws dml_exception
  */
-function local_ace_get_user_courses(int $userid, ?int $courseid = 0): array {
+function local_ace_get_user_courses(int $userid, ?int $courseid = 0, bool $ignoreanalytics = false): array {
     global $DB;
 
     $shortnameregs = get_config('local_ace', 'courseregex');
@@ -497,7 +498,12 @@ function local_ace_get_user_courses(int $userid, ?int $courseid = 0): array {
     $startfrom = time() - get_config('local_ace', 'userhistory');
     $period = get_config('local_ace', 'displayperiod');
 
-    $sql = "SELECT DISTINCT co.id, co.shortname, co.enddate, co.fullname
+    if ($ignoreanalytics) {
+        // Get active enrolled courses.
+        $courses = enrol_get_users_courses($userid, true, ['id', 'shortname', 'enddate', 'fullname']);
+    } else {
+        // Get courses where analytics data exists.
+        $sql = "SELECT DISTINCT co.id, co.shortname, co.enddate, co.fullname
               FROM {local_ace_samples} s
               JOIN {local_ace_contexts} c ON c.contextid = s.contextid
                    AND s.starttime = c.starttime AND s.endtime = c.endtime
@@ -506,7 +512,8 @@ function local_ace_get_user_courses(int $userid, ?int $courseid = 0): array {
               WHERE s.userid = :userid AND (s.endtime - s.starttime = :per) $shortnamesql
               AND s.endtime > :start ORDER BY co.shortname";
 
-    $courses = $DB->get_records_sql($sql, array('userid' => $userid, 'per' => $period, 'start' => $startfrom));
+        $courses = $DB->get_records_sql($sql, array('userid' => $userid, 'per' => $period, 'start' => $startfrom));
+    }
 
     // TODO: Rename field to acecourseexclude, or define via setting.
     $excludefield = \core_customfield\field::get_record(array('shortname' => 'ucanalyticscourseexclude'));
