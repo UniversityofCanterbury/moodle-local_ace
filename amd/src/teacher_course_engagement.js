@@ -145,8 +145,8 @@ const updateGraph = (startDate, endDate) => {
                 if (courseList === null) {
                     return;
                 }
-                HIDDEN_COURSES.push(courseList.split(","));
-                // This gets all chartjs instances on the page, there is no filtering of non teacher course engagement charts.
+                HIDDEN_COURSES = courseList.split(",");
+                // Get the specific chartjs instance created by the graph output.
                 let chartjs = chartoutput._chartjs;
                 for (let dataset in chartjs.data.datasets) {
                     let datasetObject = chartjs.data.datasets[dataset];
