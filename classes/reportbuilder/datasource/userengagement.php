@@ -24,6 +24,13 @@ use local_ace\local\entities\aceuser;
 use local_ace\local\entities\engagementlevels;
 use local_ace\local\entities\userenrolment;
 
+/**
+ * User engagement data source.
+ *
+ * @package    local_ace
+ * @copyright  2021 University of Canterbury
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class userengagement extends datasource {
 
     /**
@@ -61,7 +68,6 @@ class userengagement extends datasource {
         $engagementlevels = new engagementlevels();
         $this->add_entity($engagementlevels->add_join($coursejoin));
 
-
         $this->add_columns_from_entity($usercore->get_entity_name());
         $this->add_columns_from_entity($enrolmententity->get_entity_name());
         $this->add_columns_from_entity($courseentity->get_entity_name());
@@ -78,14 +84,29 @@ class userengagement extends datasource {
         $this->add_conditions_from_entity($engagementlevels->get_entity_name());
     }
 
+    /**
+     * Get list of default columns in data source.
+     *
+     * @return array
+     */
     public function get_default_columns(): array {
         return [];
     }
 
+    /**
+     * Get list of default filters in data source.
+     *
+     * @return array
+     */
     public function get_default_filters(): array {
         return [];
     }
 
+    /**
+     * Get list of default conditions in data source.
+     *
+     * @return array
+     */
     public function get_default_conditions(): array {
         return ['acecourse:courseselect'];
     }

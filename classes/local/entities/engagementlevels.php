@@ -25,7 +25,7 @@ use lang_string;
 use local_ace\local\filters\engagementlevel;
 
 /**
- * Current engagement columns
+ * Engagement columns
  *
  * @package    local_ace
  * @copyright  2021 University of Canterbury

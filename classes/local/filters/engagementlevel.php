@@ -41,7 +41,7 @@ class engagementlevel extends \core_reportbuilder\local\filters\base {
             2 => get_string('high', 'local_ace')
         ]);
         $element->setMultiple(true);
-   }
+    }
 
     /**
      * Return filter SQL
