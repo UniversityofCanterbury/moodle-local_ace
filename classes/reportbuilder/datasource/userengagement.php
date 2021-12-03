@@ -59,8 +59,7 @@ class userengagement extends datasource {
         $this->add_entity($courseentity->add_join($coursejoin));
 
         $engagementlevels = new engagementlevels();
-        $engagementlevels->add_join($coursejoin);
-        $this->add_entity($engagementlevels);
+        $this->add_entity($engagementlevels->add_join($coursejoin));
 
 
         $this->add_columns_from_entity($usercore->get_entity_name());
@@ -88,6 +87,6 @@ class userengagement extends datasource {
     }
 
     public function get_default_conditions(): array {
-        return [];
+        return ['acecourse:courseselect'];
     }
 }

@@ -18,11 +18,11 @@ declare(strict_types=1);
 
 namespace local_ace\local\entities;
 
-use lang_string;
-use core_reportbuilder\local\filters\text;
+use core_reportbuilder\local\entities\base;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
-use core_reportbuilder\local\entities\base;
+use lang_string;
+use local_ace\local\filters\engagementlevel;
 
 /**
  * Current engagement columns
@@ -93,26 +93,25 @@ class engagementlevels extends base {
         $contextalias = $this->get_table_alias('context');
         $coursealias = $this->get_table_alias('course');
 
-        $currentengagement = "INNER JOIN mdl_local_ace_samples samples ON samples.id = (
-        SELECT
-            s.id
-        FROM
-            mdl_local_ace_samples s
-            JOIN mdl_context cx ON s.contextid = cx.id
-            AND cx.contextlevel = 50
-            JOIN mdl_course co ON cx.instanceid = co.id
-        WHERE
-            (endtime - starttime = 259200)
-            AND s.userid = u.id
-            AND s.contextid = cctx.id
-        ORDER BY
-            s.id DESC
-            LIMIT 1
-    )";
-
-        //$currentengagement = "JOIN {context} {$contextalias
-        //                        ON {$contextalias}.instanceid = {$coursealias}.id
-        //                        AND {$contextalias}.contextlevel = 50";
+        // We make our own context alias as the course created one is only available in specific contexts.
+        $currentengagement = "JOIN mdl_context {$contextalias} ON {$contextalias}.instanceid = {$coursealias}.id
+                                AND {$contextalias}.contextlevel = " . CONTEXT_COURSE . "
+                              INNER JOIN mdl_local_ace_samples {$samplesalias} ON {$samplesalias}.id = (
+                                SELECT
+                                    s.id
+                                FROM
+                                    mdl_local_ace_samples s
+                                JOIN mdl_context cx ON s.contextid = cx.id
+                                    AND cx.contextlevel = " . CONTEXT_COURSE . "
+                                JOIN mdl_course co ON cx.instanceid = co.id
+                                WHERE
+                                    (endtime - starttime = " . $period . ")
+                                    AND s.userid = {$useralias}.id
+                                    AND s.contextid = {$contextalias}.id
+                                ORDER BY
+                                    s.id DESC
+                                LIMIT 1
+                              )";
 
         $columns[] = (new column(
             'currentengagement',
@@ -122,7 +121,17 @@ class engagementlevels extends base {
             ->add_joins($this->get_joins())
             ->add_join($currentengagement)
             ->set_is_sortable(true)
-            ->add_field("samples.value");
+            ->add_field("{$samplesalias}.value")
+            ->add_callback(static function($value) {
+                $value = floatval($value);
+                if ($value >= 0.7) {
+                    return new lang_string('high', 'local_ace');
+                } else if ($value >= 0.3) {
+                    return new lang_string('medium', 'local_ace');
+                } else {
+                    return new lang_string('low', 'local_ace');
+                }
+            });
         return $columns;
     }
 
@@ -132,15 +141,15 @@ class engagementlevels extends base {
      * @return filter[]
      */
     protected function get_all_filters(): array {
-        return [];
-    }
+        $samplealias = $this->get_table_alias('local_ace_samples');
 
-    /**
-     * User fields
-     *
-     * @return lang_string[]
-     */
-    protected function get_user_fields(): array {
-        return [];
+        $filters[] = (new filter(
+            engagementlevel::class,
+            'engagementlevel',
+            new lang_string('engagementlevelfilter', 'local_ace'),
+            $this->get_entity_name(),
+            "{$samplealias}.value"
+        ))->add_joins($this->get_joins());
+        return $filters;
     }
 }

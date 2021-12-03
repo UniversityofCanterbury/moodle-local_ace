@@ -149,3 +149,4 @@ $string['activitynamedashboardlink'] = 'Activity name with dashboard link';
 $string['userengagementdatasource'] = 'Users Engagement';
 $string['engagementlevelstitle'] = 'Engagement Level';
 $string['currentengagement'] = 'Current Engagement';
+$string['engagementlevelfilter'] = 'Engagement Level';
