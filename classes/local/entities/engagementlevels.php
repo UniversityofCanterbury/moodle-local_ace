@@ -101,9 +101,6 @@ class engagementlevels extends base {
                                     s.id
                                 FROM
                                     mdl_local_ace_samples s
-                                JOIN mdl_context cx ON s.contextid = cx.id
-                                    AND cx.contextlevel = " . CONTEXT_COURSE . "
-                                JOIN mdl_course co ON cx.instanceid = co.id
                                 WHERE
                                     (endtime - starttime = " . $period . ")
                                     AND s.userid = {$useralias}.id
