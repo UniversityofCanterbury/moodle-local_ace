@@ -94,13 +94,13 @@ class engagementlevels extends base {
         $coursealias = $this->get_table_alias('course');
 
         // We make our own context alias as the course created one is only available in specific contexts.
-        $currentengagement = "JOIN mdl_context {$contextalias} ON {$contextalias}.instanceid = {$coursealias}.id
+        $currentengagement = "JOIN {context} {$contextalias} ON {$contextalias}.instanceid = {$coursealias}.id
                                 AND {$contextalias}.contextlevel = " . CONTEXT_COURSE . "
-                              INNER JOIN mdl_local_ace_samples {$samplesalias} ON {$samplesalias}.id = (
+                              INNER JOIN {local_ace_samples} {$samplesalias} ON {$samplesalias}.id = (
                                 SELECT
                                     s.id
                                 FROM
-                                    mdl_local_ace_samples s
+                                    {local_ace_samples} s
                                 WHERE
                                     (endtime - starttime = " . $period . ")
                                     AND s.userid = {$useralias}.id
