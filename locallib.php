@@ -252,7 +252,7 @@ function local_ace_get_matching_values_to_labels(array $coursevalues): array {
                 continue;
             }
 
-            $date = userdate($value->endtime, get_string('strftimedate'));
+            $date = userdate($value->endtime, get_string('strftimedateshortmonthabbr', 'langconfig'));
             $templabels[] = $date;
             if (empty($value->value)) {
                 $series[$date] = 0;
@@ -391,7 +391,7 @@ function local_ace_course_data(int $courseid, ?int $period = null, ?int $start =
             // If this period overlaps with the last week, skip it in the display.
             continue;
         }
-        $labels[] = userdate($value->endtime, get_string('strftimedate'));
+        $labels[] = userdate($value->endtime, get_string('strftimedateshortmonthabbr', 'langconfig'));
         if (empty($value->value)) {
             $series[] = 0;
         } else {
@@ -695,7 +695,7 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
             continue;
         }
         if ($showxtitles) {
-            $labels[] = userdate($value->endtime, get_string('strftimedate'));
+            $labels[] = userdate($value->endtime, get_string('strftimedateshortmonthabbr', 'langconfig'));
         } else {
             $labels[] = '';
         }
@@ -861,7 +861,7 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
 
     $count = 0;
     foreach ($records as $record) {
-        $labels[] = userdate(strtotime($record->date), get_string('strftimedate'));
+        $labels[] = userdate(strtotime($record->date), get_string('strftimedateshortmonthabbr', 'langconfig'));
         // Normalise the value into a 0-100 range.
         if ($cumulative) {
             $count += $record->count;
