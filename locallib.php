@@ -40,14 +40,30 @@ function local_ace_teacher_course_graph(int $userid): string {
 
     $config = get_config('local_ace');
     $renderer = $PAGE->get_renderer('core');
-    $output = $renderer->render_from_template('local_ace/teacher_course_engagement_chart', null);
+
+    $tabs = array();
+    $courses = local_ace_get_enrolled_courses($userid);
+
+    foreach ($courses as $course) {
+        $context = context_course::instance($course->id);
+        $newurl = new moodle_url($config->coursedashboardurl, ['contextid' => $context->id]);
+        $tabs[] = new tabobject($course->id,
+            $newurl,
+            $course->shortname);
+    }
+
+    $output = html_writer::start_div('useranalytics');
+    $output .= print_tabs(array($tabs), null, null, null, true);
+    $output .= $renderer->render_from_template('local_ace/teacher_course_engagement_chart', null);
 
     $params = [
         'colours' => explode(',', $config->colours),
     ];
 
     $PAGE->requires->js_call_amd('local_ace/teacher_course_engagement', 'init', [$params]);
-    $PAGE->requires->css('/local/ace/styles.css');
+
+    $output .= html_writer::end_div();
+
     return $output;
 }
 
@@ -141,26 +157,18 @@ function local_ace_get_individuals_course_data(int $userid, int $courseid, int $
 }
 
 /**
- * Returns the course average data from the courses the user is enrolled in.
+ * Get list of courses user is enrolled in
  *
- * @param int $userid
- * @param int|null $period
- * @param int|null $start
- * @param int|null $end
- * @return array|array[]
+ * @param int $userid User ID
+ * @param int|null $start Start of course, defaults to today - half a year
+ * @return array Array of courses keyed by course id
  * @throws coding_exception
  * @throws dml_exception
  */
-function local_ace_enrolled_courses_average_data(int $userid, ?int $period = null, ?int $start = null, ?int $end = null): array {
+function local_ace_get_enrolled_courses(int $userid, ?int $start = null): array {
     global $DB;
 
-    $data = array('series' => [], 'xlabels' => []);
-
     $config = get_config('local_ace');
-
-    if ($period === null) {
-        $period = (int) $config->displayperiod;
-    }
 
     $params = [
         'userid' => $userid,
@@ -173,7 +181,7 @@ function local_ace_enrolled_courses_average_data(int $userid, ?int $period = nul
     $filtersql = "WHERE ";
     if (!isset($start)) {
         $filtersql .= "co.startdate >= :coursestart AND co.startdate <= :now";
-        $params['coursestart'] = time() - 15768000; // TODO: Move into a setting, to support uni's that do trimesters.
+        $params['coursestart'] = time() - (YEARSECS / 2); // TODO: Move into a setting, to support uni's that do trimesters.
         $params['now'] = time();
     }
 
@@ -206,6 +214,31 @@ function local_ace_enrolled_courses_average_data(int $userid, ?int $period = nul
             }
         }
     }
+
+    return $courses;
+}
+
+/**
+ * Returns the course average data from the courses the user is enrolled in.
+ *
+ * @param int $userid
+ * @param int|null $period
+ * @param int|null $start
+ * @param int|null $end
+ * @return array|array[]
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function local_ace_enrolled_courses_average_data(int $userid, ?int $period = null, ?int $start = null, ?int $end = null): array {
+    $data = array('series' => [], 'xlabels' => []);
+
+    $config = get_config('local_ace');
+
+    if ($period === null) {
+        $period = (int) $config->displayperiod;
+    }
+
+    $courses = local_ace_get_enrolled_courses($userid, $start);
 
     $allvalues = [];
 
