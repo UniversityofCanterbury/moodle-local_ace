@@ -152,3 +152,8 @@ $string['userengagementdatasource'] = 'Users Engagement';
 $string['engagementlevelstitle'] = 'Engagement Level';
 $string['currentengagement'] = 'Current Engagement';
 $string['engagementlevelfilter'] = 'Engagement Level';
+
+$string['useractivity'] = 'User Activity Engagement';
+$string['activityengagement'] = 'Activity Engagement';
+$string['pagecontextactivity'] = 'Page activity context';
+$string['totalaccesses'] = 'No. of accesses';
