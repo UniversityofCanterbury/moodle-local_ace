@@ -54,18 +54,22 @@ class engagementlevel extends \core_reportbuilder\local\filters\base {
             return ['', []];
         }
         if (isset($values["{$this->name}_engagementlevel"])) {
+            $config = get_config('local_ace');
+            $highcutoff = isset($config->highengagementcutoff) ? (float) $config->highengagementcutoff : 0.7;
+            $mediumcutoff = isset($config->mediumengagementcutoff) ? (float) $config->mediumengagementcutoff : 0.3;
+
             $levels = $values["{$this->name}_engagementlevel"];
             $fieldsql = $this->filter->get_field_sql();
             $sql = [];
             foreach ($levels as $level) {
                 if ($level == 2) {
-                    $sql[] = "($fieldsql >= 0.7)";
+                    $sql[] = "($fieldsql >= $highcutoff)";
                 }
                 if ($level == 1) {
-                    $sql[] = "($fieldsql >= 0.3 AND $fieldsql < 0.7)";
+                    $sql[] = "($fieldsql >= $mediumcutoff AND $fieldsql < $highcutoff)";
                 }
                 if ($level == 0) {
-                    $sql[] = "($fieldsql < 0.3)";
+                    $sql[] = "($fieldsql < $mediumcutoff)";
                 }
             }
             $sql = implode(' OR ', $sql);

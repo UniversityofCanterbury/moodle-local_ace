@@ -128,6 +128,22 @@ if ($hassiteconfig) {
             new lang_string('colours', 'local_ace'),
             new lang_string('colours_desc', 'local_ace'),
             '#2e2c2fff,#23c9ffff,#d64045ff,#729b79ff,#475b63ff,#467599ff,#1d3354ff,#37515fff'));
+
+        $settings->add(new admin_setting_configtext(
+            'local_ace/highengagementcutoff',
+            new lang_string('highengagementcutoff', 'local_ace'),
+            new lang_string('highengagementcutoff_desc', 'local_ace'),
+            0.7,
+            PARAM_FLOAT
+        ));
+
+        $settings->add(new admin_setting_configtext(
+            'local_ace/mediumengagementcutoff',
+            new lang_string('mediumengagementcutoff', 'local_ace'),
+            new lang_string('mediumengagementcutoff_desc', 'local_ace'),
+            0.3,
+            PARAM_FLOAT
+        ));
     }
     $ADMIN->add('localplugins', $settings);
 }

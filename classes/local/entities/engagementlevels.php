@@ -120,10 +120,13 @@ class engagementlevels extends base {
             ->set_is_sortable(true)
             ->add_field("{$samplesalias}.value")
             ->add_callback(static function($value) {
+                $config = get_config('local_ace');
+                $highcutoff = isset($config->highengagementcutoff) ? (float) $config->highengagementcutoff : 0.7;
+                $mediumcutoff = isset($config->mediumengagementcutoff) ? (float) $config->mediumengagementcutoff : 0.3;
                 $value = floatval($value);
-                if ($value >= 0.7) {
+                if ($value >= $highcutoff) {
                     return new lang_string('high', 'local_ace');
-                } else if ($value >= 0.3) {
+                } else if ($value >= $mediumcutoff) {
                     return new lang_string('medium', 'local_ace');
                 } else {
                     return new lang_string('low', 'local_ace');
