@@ -49,6 +49,8 @@ class userenrolment extends base {
             'user_enrolments' => 'ueue',
             'role' => 'uer',
             'user_lastaccess' => 'ueul',
+            'context' => 'uectx',
+            'role_assignments' => 'eura',
         ];
     }
 
@@ -92,7 +94,7 @@ class userenrolment extends base {
      * Time enrolment ended (user_enrolments.timeend)
      * Time created (user_enrolments.timeend),
      * Enrol plugin used (mdl_enrol.enrol)
-     * Role given to user (mdl_enrol.roleid - allowing for role shortname.
+     * Role given to user (mdl_role_assignments.roleid - allowing for role shortname.
      * User last access (join with mdl_user_lastaccess table)
      *
      * These are all the columns available to use in any report that uses this entity.
@@ -105,8 +107,16 @@ class userenrolment extends base {
         $enrolalias = $this->get_table_alias('enrol');
         $rolealias = $this->get_table_alias('role');
         $userlastaccessalias = $this->get_table_alias('user_lastaccess');
+        $contextalias = $this->get_table_alias('context');
+        $roleassignmentalias = $this->get_table_alias('role_assignments');
 
         $this->add_join("INNER JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid");
+
+        $rolejoin = "JOIN {context} {$contextalias} ON {$contextalias}.instanceid = {$enrolalias}.courseid
+                        AND {$contextalias}.contextlevel = " . CONTEXT_COURSE . "
+                     LEFT JOIN {role_assignments} {$roleassignmentalias} ON {$roleassignmentalias}.contextid = {$contextalias}.id
+                        AND {$roleassignmentalias}.userid = {$userenrolmentsalias}.userid
+                     LEFT JOIN {role} {$rolealias} ON {$rolealias}.id = {$roleassignmentalias}.roleid";
 
         // Time enrolment started (user_enrolments.timestart).
         $columns[] = (new column(
@@ -158,7 +168,7 @@ class userenrolment extends base {
             $this->get_entity_name()
         ))
             ->add_joins($this->get_joins())
-            ->add_join("JOIN {role} {$rolealias} ON {$rolealias}.id = {$enrolalias}.roleid")
+            ->add_join($rolejoin)
             ->set_is_sortable(true)
             ->add_fields("$rolealias.shortname");
 
