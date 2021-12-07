@@ -112,11 +112,11 @@ class userenrolment extends base {
 
         $this->add_join("INNER JOIN {enrol} {$enrolalias} ON {$enrolalias}.id = {$userenrolmentsalias}.enrolid");
 
-        $rolejoin = "JOIN {context} {$contextalias} ON {$contextalias}.instanceid = {$enrolalias}.courseid
+        $this->add_join("JOIN {context} {$contextalias} ON {$contextalias}.instanceid = {$enrolalias}.courseid
                         AND {$contextalias}.contextlevel = " . CONTEXT_COURSE . "
                      LEFT JOIN {role_assignments} {$roleassignmentalias} ON {$roleassignmentalias}.contextid = {$contextalias}.id
                         AND {$roleassignmentalias}.userid = {$userenrolmentsalias}.userid
-                     LEFT JOIN {role} {$rolealias} ON {$rolealias}.id = {$roleassignmentalias}.roleid";
+                     LEFT JOIN {role} {$rolealias} ON {$rolealias}.id = {$roleassignmentalias}.roleid");
 
         // Time enrolment started (user_enrolments.timestart).
         $columns[] = (new column(
@@ -168,9 +168,8 @@ class userenrolment extends base {
             $this->get_entity_name()
         ))
             ->add_joins($this->get_joins())
-            ->add_join($rolejoin)
             ->set_is_sortable(true)
-            ->add_fields("$rolealias.shortname");
+            ->add_fields("{$rolealias}.shortname");
 
         $columns[] = (new column(
             'lastaccessed',
@@ -258,8 +257,7 @@ class userenrolment extends base {
             $this->get_entity_name(),
             "{$rolealias}.shortname"
         ))
-            ->add_joins($this->get_joins())
-            ->add_join("JOIN {role} {$rolealias} ON {$rolealias}.id = {$enrolalias}.roleid");
+            ->add_joins($this->get_joins());
 
         // User last access (join with mdl_user_lastaccess table).
         $filters[] = (new filter(
