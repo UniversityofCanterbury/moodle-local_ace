@@ -96,7 +96,7 @@ class userentity extends base {
         $usertablealias = $this->get_table_alias('user');
         $coursealias = $this->get_table_alias('course');
 
-        $join7days = "JOIN (
+        $join7days = "LEFT JOIN (
                            SELECT courseid, userid, COUNT(*) as last7
                                FROM {logstore_standard_log}
                            WHERE timecreated > $daysago7
@@ -104,7 +104,7 @@ class userentity extends base {
                        ON {$this->logstorealias1}.courseid = {$coursealias}.id
                        AND {$this->logstorealias1}.userid = {$usertablealias}.id";
 
-        $join30days = "JOIN (
+        $join30days = "LEFT JOIN (
                            SELECT courseid, userid, COUNT(*) as last30
                                FROM {logstore_standard_log}
                            WHERE timecreated > $daysago30
@@ -112,7 +112,7 @@ class userentity extends base {
                        ON {$this->logstorealias2}.courseid = {$coursealias}.id
                        AND {$this->logstorealias2}.userid = {$usertablealias}.id";
 
-        $jointotal = "JOIN (
+        $jointotal = "LEFT JOIN (
                            SELECT courseid, userid, COUNT(*) as total
                                FROM {logstore_standard_log}
                            GROUP BY courseid, userid) AS {$this->logstorealias3}

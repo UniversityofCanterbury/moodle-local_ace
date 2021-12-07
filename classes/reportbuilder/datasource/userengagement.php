@@ -23,6 +23,7 @@ use local_ace\local\entities\acecourse;
 use local_ace\local\entities\aceuser;
 use local_ace\local\entities\engagementlevels;
 use local_ace\local\entities\userenrolment;
+use local_ace\local\entities\userentity;
 
 /**
  * User engagement data source.
@@ -65,23 +66,31 @@ class userengagement extends datasource {
                        JOIN {course} {$coursetablealias} ON {$coursetablealias}.id = exex1.courseid";
         $this->add_entity($courseentity->add_join($coursejoin));
 
+        // Add the engagement level columns.
         $engagementlevels = new engagementlevels();
         $this->add_entity($engagementlevels->add_join($coursejoin));
+
+        // Add the user entity for the last X days columns.
+        $userentity = new userentity();
+        $this->add_entity($userentity->add_join($coursejoin));
 
         $this->add_columns_from_entity($usercore->get_entity_name());
         $this->add_columns_from_entity($enrolmententity->get_entity_name());
         $this->add_columns_from_entity($courseentity->get_entity_name());
         $this->add_columns_from_entity($engagementlevels->get_entity_name());
+        $this->add_columns_from_entity($userentity->get_entity_name());
 
         $this->add_filters_from_entity($usercore->get_entity_name());
         $this->add_filters_from_entity($enrolmententity->get_entity_name());
         $this->add_filters_from_entity($courseentity->get_entity_name());
         $this->add_filters_from_entity($engagementlevels->get_entity_name());
+        $this->add_filters_from_entity($userentity->get_entity_name());
 
         $this->add_conditions_from_entity($usercore->get_entity_name());
         $this->add_conditions_from_entity($enrolmententity->get_entity_name());
         $this->add_conditions_from_entity($courseentity->get_entity_name());
         $this->add_conditions_from_entity($engagementlevels->get_entity_name());
+        $this->add_conditions_from_entity($userentity->get_entity_name());
     }
 
     /**
