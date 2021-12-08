@@ -100,6 +100,7 @@ $string['yourengagement'] = 'Your engagement';
 $string['coursefilter'] = 'Course filter';
 $string['showcumulative'] = 'Show cumulative';
 $string['showdailyaccess'] = 'Show daily access';
+$string['acedashboard'] = 'ACE Dashboard';
 
 $string['privacy:metadata:local_ace'] = 'Summary of user analytics data';
 $string['privacy:metadata:local_ace:userid'] = 'The Moodle userid';

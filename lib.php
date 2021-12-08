@@ -43,6 +43,36 @@ function local_ace_user_preferences() {
 }
 
 /**
+ * Callback for rendering navbar.
+ * If viewing a ACE(vxg) dashboard and have the view other users analytics capability the 'My courses' breadcrumb
+ * is replaced with the teacher dashboard URL.
+ *
+ * @param renderer_base $renderer
+ * @return void
+ */
+function local_ace_render_navbar_output(\renderer_base $renderer) {
+    global $PAGE, $USER;
+
+    if (strpos($PAGE->url->get_path(), '/local/vxg_dashboard/index.php') !== 0) {
+        return;
+    }
+
+    if (!has_capability('local/ace:view', $PAGE->context, $USER)) {
+        return;
+    }
+
+    $config = get_config('local_ace');
+    foreach ($PAGE->navbar->get_items() as $item) {
+        if ($item instanceof breadcrumb_navigation_node) {
+            if ($item->text === get_string('mycourses')) {
+                $item->text = get_string('acedashboard', 'local_ace');
+                $item->action = new moodle_url($config->teacherdashboardurl);
+            }
+        }
+    }
+}
+
+/**
  * Returns the list of all modules using a static var to prevent multiple db lookups.
  *
  * @return array where key is the module id and value is (component name without 'mod_')
