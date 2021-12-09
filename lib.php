@@ -62,9 +62,19 @@ function local_ace_render_navbar_output(\renderer_base $renderer) {
     }
 
     $config = get_config('local_ace');
+
+    // If on the user dashboard page we add the teacher url to the second node.
+    if (count($PAGE->navbar->get_items()) >= 2 && strpos($PAGE->url->out(), $config->userdashboardurl) === 0) {
+        $dashboardnode = $PAGE->navbar->get_items()[1];
+        $dashboardnode->text = get_string('acedashboard', 'local_ace');
+        $dashboardnode->action = new moodle_url($config->teacherdashboardurl);
+        return;
+    }
+
+    // This catches the course & activity context dashboards for both enrolled and unenrolled users.
     foreach ($PAGE->navbar->get_items() as $item) {
         if ($item instanceof breadcrumb_navigation_node) {
-            if ($item->text === get_string('mycourses')) {
+            if ($item->key === 'mycourses' || $item->key === 'courses') {
                 $item->text = get_string('acedashboard', 'local_ace');
                 $item->action = new moodle_url($config->teacherdashboardurl);
             }
