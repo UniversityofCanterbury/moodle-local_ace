@@ -922,7 +922,7 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
  * @return float
  */
 function local_ace_normalise_value(float $value, float $min, float $max) {
-    return min((($value - $min) / ($max - $min)) * 100, $max);
+    return min((($value - $min) / ($max - $min)) * 100, 100);
 }
 
 /**
