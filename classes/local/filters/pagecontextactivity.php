@@ -21,6 +21,10 @@ namespace local_ace\local\filters;
 use core_reportbuilder\local\helpers\database;
 use MoodleQuickForm;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/local/ace/locallib.php');
+
 /**
  * Get the activity context from global $PAGE and use it as a filter.
  *
@@ -48,15 +52,7 @@ class pagecontextactivity extends \core_reportbuilder\local\filters\base {
     public function get_sql_filter(array $values): array {
         global $PAGE;
 
-        try {
-            $context = $PAGE->context;
-            if ($context->contextlevel === CONTEXT_MODULE) {
-                $coursemoduleid = $context->instanceid;
-            }
-            // @codingStandardsIgnoreStart
-        } catch (\coding_exception $ignored) {
-        }
-        // @codingStandardsIgnoreStart
+        $coursemoduleid = local_ace_get_coursemodule_helper();
 
         $name = database::generate_param_name();
 
