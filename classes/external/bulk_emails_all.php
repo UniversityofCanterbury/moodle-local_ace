@@ -87,9 +87,7 @@ class bulk_emails_all extends external_api {
         $reporttable = custom_report_table_view::create($reportpersistent->get('id'));
         $sql = $reporttable->sql;
         $records = $DB->get_records_sql("SELECT distinct u.id FROM {$sql->from} WHERE {$sql->where}", $sql->params);
-        foreach ($records as $record) {
-            $userids[] = $record->id;
-        }
+        $userids = array_column($records, 'id');
 
         $count = local_ace_send_bulk_email($userids, $params['subject'], $params['body']);
         if ($count == 0) {
