@@ -61,8 +61,7 @@ class bulk_emails_all extends external_api {
      * @return array
      */
     public static function send_bulk_emails_all(int $reportid, string $subject, string $body): array {
-        global $PAGE;
-        global $DB;
+        global $PAGE, $DB;
 
         $params = self::validate_parameters(
             self::send_bulk_emails_all_parameters(),
@@ -84,10 +83,6 @@ class bulk_emails_all extends external_api {
         // Get all userids of the selected report with the active filters.
         $report = manager::get_report_from_id($reportid);
         $reportpersistent = $report->get_report_persistent();
-        // Generate filters form if report contains any filters.
-        $source = $reportpersistent->get('source');
-        /** @var datasource $datasource */
-        $datasource = new $source($reportpersistent);
         // Generate the table from the report conditions and active filters.
         $reporttable = custom_report_table_view::create($reportpersistent->get('id'));
         $sql = $reporttable->sql;
