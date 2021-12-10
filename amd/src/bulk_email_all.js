@@ -32,6 +32,10 @@
          {
              key: 'emailsend',
              component: 'local_ace'
+         },
+         {
+             key: 'bulkemailall',
+             component: 'local_ace',
          }
      ];
      let emailSend = '';

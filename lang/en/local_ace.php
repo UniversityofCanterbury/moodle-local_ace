@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Analytics for course engagement';
-$string['privacy:metadata'] = 'The Analytics for course engagement plugin does not store any personal data.';
+
 $string['manage'] = 'Manage analytics for course engagement';
 $string['logo'] = 'Logo';
 $string['due'] = 'Due date';
@@ -113,6 +113,7 @@ $string['emailsend'] = 'Send';
 $string['emailtext'] = 'Email text';
 $string['emailsubject'] = 'Email subject';
 $string['emailsent'] = 'Emails have been sent to selected users';
+$string['emailsentall'] = 'Emails have been sent to all users of this report';
 $string['emailportionfailed'] = 'An error has occurred, only a portion of the emails have been sent.';
 $string['emailfailed'] = 'Unfortunately something went wrong and the emails have not sent. Please try again';
 $string['bulkemailall'] = 'Email All';

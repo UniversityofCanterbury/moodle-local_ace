@@ -45,7 +45,7 @@ class bulk_emails_all extends external_api {
     public static function send_bulk_emails_all_parameters(): external_function_parameters {
         return new external_function_parameters(
             array(
-                'reportid' => new external_value(PARAM_TEXT, 'Report ID'),
+                'reportid' => new external_value(PARAM_INT, 'Report ID'),
                 'subject' => new external_value(PARAM_TEXT, 'Email subject'),
                 'body' => new external_value(PARAM_TEXT, 'Email body')
             )
@@ -62,6 +62,7 @@ class bulk_emails_all extends external_api {
      */
     public static function send_bulk_emails_all(int $reportid, string $subject, string $body): array {
         global $PAGE;
+        global $DB;
 
         $params = self::validate_parameters(
             self::send_bulk_emails_all_parameters(),
@@ -81,24 +82,27 @@ class bulk_emails_all extends external_api {
         }
 
         // Get all userids of the selected report with the active filters.
-        global $DB;
         $report = manager::get_report_from_id($reportid);
         $reportpersistent = $report->get_report_persistent();
+        // Generate filters form if report contains any filters.
         $source = $reportpersistent->get('source');
+        /** @var datasource $datasource */
         $datasource = new $source($reportpersistent);
+        // Generate the table from the report conditions and active filters.
         $reporttable = custom_report_table_view::create($reportpersistent->get('id'));
         $sql = $reporttable->sql;
         $records = $DB->get_records_sql("SELECT distinct u.id FROM {$sql->from} WHERE {$sql->where}", $sql->params);
         foreach ($records as $record) {
             $userids[] = $record->id;
         }
+
         $count = local_ace_send_bulk_email($userids, $params['subject'], $params['body']);
         if ($count == 0) {
             // No emails were sent.
             return ['message' => get_string('emailfailed', 'local_ace')];
         } else if (count($userids) === $count) {
             // All emails were sent.
-            return ['message' => get_string('emailsent', 'local_ace')];
+            return ['message' => get_string('emailsentall', 'local_ace')];
         }
         // Only a portion of the emails were sent.
         return ['message' => get_string('emailportionfailed', 'local_ace')];
