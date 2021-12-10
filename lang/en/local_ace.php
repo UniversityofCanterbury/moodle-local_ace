@@ -165,3 +165,5 @@ $string['pagecontextactivity'] = 'Page activity context';
 $string['totalaccesses'] = 'No. of accesses';
 $string['lastaccessanyuser'] = 'Last access by any user';
 $string['lastaccessthisuser'] = 'Last access by this user';
+$string['countallusers'] = 'Number of users who have accessed this activity';
+$string['countallstudents'] = 'Number of students who have accessed this activity';

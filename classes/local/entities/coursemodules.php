@@ -55,6 +55,10 @@ class coursemodules extends base {
     private $logstorealias1 = "cmlsls1";
     /** @var string */
     private $logstorealias2 = "cmlsls2";
+    /** @var string */
+    private $logstorealias3 = "cmlsls3";
+    /** @var string */
+    private $logstorealias4 = "cmlsls4";
 
     /**
      * Database tables that this entity uses and their default aliases
@@ -286,6 +290,46 @@ class coursemodules extends base {
             ->add_field("{$this->logstorealias2}.lastaccessthis")
             ->set_callback([format::class, 'userdate']);
 
+        $countallusersjoin = "LEFT JOIN (SELECT count(distinct userid) as countallusers, contextinstanceid
+                                           FROM {logstore_standard_log}
+                                          WHERE courseid = $courseid AND contextlevel = ".CONTEXT_MODULE ."
+                                                AND crud = 'r'
+                                       GROUP BY contextinstanceid) {$this->logstorealias3}
+                                        ON {$this->logstorealias3}.contextinstanceid = {$cmalias}.id";
+        $columns[] = (new column(
+            'countallusers',
+            new lang_string('countallusers', 'local_ace'),
+            $this->get_entity_name()
+        ))
+            ->add_joins($this->get_joins())
+            ->add_join($countallusersjoin)
+            ->set_is_sortable(true)
+            ->set_type(column::TYPE_INTEGER)
+            ->add_field("{$this->logstorealias3}.countallusers");
+
+        // This hard-codes against the student role which is usually not ideal, however we make a column above available
+        // for sites that do not use wish to use the student role.
+        $countallstudentsjoin = "LEFT JOIN (SELECT count(distinct casjl.userid) as countallusers, casjl.contextinstanceid
+                                           FROM {logstore_standard_log} casjl
+                                           JOIN {context} casjc ON casjc.instanceid = casjl.courseid
+                                                AND casjc.contextlevel = " . CONTEXT_COURSE . "
+                                           JOIN {role_assignments} casjra ON casjra.contextid = casjc.id
+                                                AND casjl.userid = casjra.userid
+                                           JOIN {role} casjr on casjr.id = casjra.roleid AND casjr.shortname = 'student'
+                                          WHERE casjl.courseid = $courseid AND casjl.contextlevel = ".CONTEXT_MODULE ."
+                                                AND crud = 'r'
+                                       GROUP BY contextinstanceid) {$this->logstorealias4}
+                                        ON {$this->logstorealias4}.contextinstanceid = {$cmalias}.id";
+        $columns[] = (new column(
+            'countallstudents',
+            new lang_string('countallstudents', 'local_ace'),
+            $this->get_entity_name()
+        ))
+            ->add_joins($this->get_joins())
+            ->add_join($countallstudentsjoin)
+            ->set_is_sortable(true)
+            ->set_type(column::TYPE_INTEGER)
+            ->add_field("{$this->logstorealias4}.countallusers");
         return $columns;
     }
 
