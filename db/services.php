@@ -75,6 +75,16 @@ $functions = array(
         'ajax' => true,
         'services' => array('local_ace_webservice')
     ),
+    'local_ace_send_bulk_emails_all' => array(
+        'classname' => 'bulk_emails_all',
+        'methodname' => 'send_bulk_emails_all',
+        'classpath' => 'local/ace/classes/external/bulk_emails_all.php',
+        'description' => 'Send bulk emails all',
+        'type' => 'write',
+        'capabilities' => 'local/ace:sendbulkemails',
+        'ajax' => true,
+        'services' => array('local_ace_webservice')
+    ),
 );
 
 $services = array(

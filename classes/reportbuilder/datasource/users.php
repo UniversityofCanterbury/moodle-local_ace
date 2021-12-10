@@ -131,6 +131,12 @@ class users extends datasource {
             'value' => get_string('bulkemailallselected', 'local_ace'),
             'module' => 'local_ace/bulk_email'
         ]);
+
+        $this->add_action_button([
+            'id' => 'emailall',
+            'value' => get_string('bulkemailall', 'local_ace'),
+            'module' => 'local_ace/bulk_email_all'
+        ]);
     }
 
     /**
