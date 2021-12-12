@@ -19,10 +19,12 @@ declare(strict_types=1);
 namespace local_ace\local\entities;
 
 use core_reportbuilder\local\entities\base;
-use core_reportbuilder\local\filters\text;
 use core_reportbuilder\local\report\column;
-use core_reportbuilder\local\report\filter;
 use lang_string;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot.'/local/ace/locallib.php');
 
 /**
  * User entity class implementation.
@@ -90,6 +92,13 @@ class userentity extends base {
      * @return column[]
      */
     protected function get_all_columns(): array {
+        $course = local_ace_get_course_helper();
+        if (!empty($course)) {
+            $courseid = $course->id;
+        } else {
+            $courseid = 0; // Should not happen when using this entity correctly, set to 0 to prevent SQL dying.
+        }
+
         $daysago7 = time() - (DAYSECS * 7);
         $daysago30 = time() - (DAYSECS * 30);
 
@@ -99,7 +108,7 @@ class userentity extends base {
         $join7days = "LEFT JOIN (
                            SELECT courseid, userid, COUNT(*) as last7
                                FROM {logstore_standard_log}
-                           WHERE timecreated > $daysago7
+                           WHERE timecreated > $daysago7 AND crud = 'r' AND courseid = $courseid
                            GROUP BY courseid, userid) AS {$this->logstorealias1}
                        ON {$this->logstorealias1}.courseid = {$coursealias}.id
                        AND {$this->logstorealias1}.userid = {$usertablealias}.id";
@@ -107,7 +116,7 @@ class userentity extends base {
         $join30days = "LEFT JOIN (
                            SELECT courseid, userid, COUNT(*) as last30
                                FROM {logstore_standard_log}
-                           WHERE timecreated > $daysago30
+                           WHERE timecreated > $daysago30 AND crud = 'r' AND courseid = $courseid
                            GROUP BY courseid, userid) AS {$this->logstorealias2}
                        ON {$this->logstorealias2}.courseid = {$coursealias}.id
                        AND {$this->logstorealias2}.userid = {$usertablealias}.id";
@@ -115,6 +124,7 @@ class userentity extends base {
         $jointotal = "LEFT JOIN (
                            SELECT courseid, userid, COUNT(*) as total
                                FROM {logstore_standard_log}
+                           WHERE crud = 'r' AND courseid = $courseid
                            GROUP BY courseid, userid) AS {$this->logstorealias3}
                        ON {$this->logstorealias3}.courseid = {$coursealias}.id
                        AND {$this->logstorealias3}.userid = {$usertablealias}.id";
