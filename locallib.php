@@ -706,18 +706,6 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
     $average2 = array();
     $laststart = null;
 
-    $max = 0;
-    $min = 0;
-    foreach ($values as $value) {
-        $val = ($value->value / $value->count) * 100;
-        if ($val > $max) {
-            $max = $val;
-        }
-        if ($val < $min) {
-            $min = $val;
-        }
-    }
-
     if ($max === 0) {
         return get_string('noanalyticsfound', 'local_ace');
     }
@@ -737,7 +725,7 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
             $series[] = 0;
         } else {
             if ($normalisevalues) {
-                $series[] = round(local_ace_normalise_value(($value->value / $value->count) * 100, $min, $max));
+                $series[] = round(local_ace_normalise_value(($value->value / $value->count) * 100, 0, 100));
             } else {
                 $series[] = round(($value->value / $value->count) * 100);
             }
@@ -748,8 +736,8 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
             $average2[] = 0;
         } else {
             if ($normalisevalues) {
-                $average1[] = round(local_ace_normalise_value(($value->avg - ($value->stddev / 2)) * 100, $min, $max));
-                $average2[] = round(local_ace_normalise_value(($value->avg + ($value->stddev / 2)) * 100, $min, $max));
+                $average1[] = round(local_ace_normalise_value(($value->avg - ($value->stddev / 2)) * 100, 0, 100));
+                $average2[] = round(local_ace_normalise_value(($value->avg + ($value->stddev / 2)) * 100, 0, 100));
             } else {
                 $average1[] = min(round(($value->avg - ($value->stddev / 2)) * 100), 100);
                 $average2[] = min(round(($value->avg + ($value->stddev / 2)) * 100), 100);
