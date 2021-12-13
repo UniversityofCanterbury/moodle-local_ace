@@ -34,7 +34,8 @@ defined('MOODLE_INTERNAL') || die();
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\plugin\provider,
-    \core_privacy\local\request\core_userlist_provider {
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\user_preference_provider {
 
     /**
      * Returns metadata.
@@ -52,7 +53,39 @@ class provider implements
                 'value' => 'privacy:metadata:local_ace:value',
              ], 'privacy:metadata:local_ace'
         );
+
+        $collection->add_user_preference(
+            'local_ace_teacher_hidden_courses', 'privacy:metadata:preference:localaceteacherhiddencourses'
+        );
+        $collection->add_user_preference(
+            'local_ace_comparison_method', 'privacy:metadata:preference:localacecomparisonmethod'
+        );
+
         return $collection;
+    }
+
+    /**
+     * Export all user preferences for the plugin.
+     *
+     * @param   int         $userid The userid of the user whose data is to be exported.
+     */
+    public static function export_user_preferences(int $userid) {
+        $teacherhiddencourses = get_user_preferences('local_ace_teacher_hidden_courses', null, $userid);
+        if ($teacherhiddencourses !== null) {
+            writer::export_user_preference('local_ace',
+                'local_ace_teacher_hidden_courses',
+                transform::yesno($teacherhiddencourses),
+                get_string('privacy:metadata:preference:localaceteacherhiddencourses', 'local_ace')
+            );
+        }
+        $comparisonmethod = get_user_preferences('local_ace_comparison_method', null, $userid);
+        if ($comparisonmethod !== null) {
+            writer::export_user_preference('local_ace',
+                'local_ace_comparison_method',
+                transform::yesno($comparisonmethod),
+                get_string('privacy:metadata:preference:localacecomparisonmethod', 'local_ace')
+            );
+        }
     }
 
     /**
