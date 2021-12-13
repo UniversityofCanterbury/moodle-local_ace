@@ -52,9 +52,8 @@
          modal.getRoot()[0].classList.add('local_ace-slim-modal');
          modal.setSaveButtonText(emailSend);
          modal.getRoot().on(ModalEvents.save, function() {
-             const queryString = window.location.search;
-             const urlParams = new URLSearchParams(queryString);
-             let reportid = urlParams.get('id');
+             let tableuniqueid = document.querySelector('.table-dynamic').getAttribute('data-table-uniqueid');
+             let reportid = tableuniqueid.split('custom-report-table-')[1];
              let subject = document.querySelector('#local_ace-email-subject').value;
              let body = document.querySelector('#local_ace-email-body').value;
              sendBulkEmailsAll(reportid, subject, body).then(response => {
