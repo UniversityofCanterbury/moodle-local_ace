@@ -706,10 +706,6 @@ function local_ace_student_graph_data(int $userid, $course, ?int $start = null, 
     $average2 = array();
     $laststart = null;
 
-    if ($max === 0) {
-        return get_string('noanalyticsfound', 'local_ace');
-    }
-
     foreach ($values as $value) {
         if (!empty($laststart) && $value->endtime > ($laststart + (DAYSECS))) {
             // If this period overlaps with the last week, skip it in the display.
@@ -891,11 +887,14 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
         }
     }
 
-    if ($max < 2) {
-        $max = 2;
+    if ($max < 4) {
+        $max = 4;
     }
 
     $stepsize = ceil($max / 4);
+    if ($stepsize * 4 > $max) {
+        $max = $stepsize * 4;
+    }
 
     $ylabels = [];
     for ($val = 0; $val <= $max; $val += $stepsize) {
