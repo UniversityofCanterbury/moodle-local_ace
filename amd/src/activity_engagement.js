@@ -107,8 +107,8 @@ const updateGraph = (startDatetime = START_TIME, endDateTime = END_TIME) => {
         let data = getGraphDataPlaceholder();
         data.series[0].values = response.series;
         data.labels = response.xlabels;
-        data.axes.y[0].max = 100;
-        data.axes.y[0].stepSize = 25;
+        data.axes.y[0].max = response.max;
+        data.axes.y[0].stepSize = response.stepsize;
         let yLabels = {};
         response.ylabels.forEach((element) => {
             yLabels[element.value] = element.label;

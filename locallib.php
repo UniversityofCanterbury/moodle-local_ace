@@ -878,7 +878,6 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
     } else {
         $max = max(array_column($records, 'count'));
     }
-    $min = min(array_column($records, 'count'));
 
     $count = 0;
     foreach ($records as $record) {
@@ -886,18 +885,32 @@ function local_ace_course_module_engagement_data(int $cmid, ?int $start = null, 
         // Normalise the value into a 0-100 range.
         if ($cumulative) {
             $count += $record->count;
-            $series[] = local_ace_normalise_value($count, $min, $max);
+            $series[] = $count;
         } else {
-            $series[] = local_ace_normalise_value($record->count, $min, $max);
+            $series[] = $record->count;
         }
     }
 
-    $ylabels = local_ace_get_percentage_ylabels();
+    if ($max < 2) {
+        $max = 2;
+    }
+
+    $stepsize = ceil($max / 4);
+
+    $ylabels = [];
+    for ($val = 0; $val <= $max; $val += $stepsize) {
+        $ylabels[] = [
+            'value' => $val,
+            'label' => $val
+        ];
+    }
 
     return array(
         'series' => $series,
         'xlabels' => $labels,
         'ylabels' => $ylabels,
+        'max' => $max,
+        'stepsize' => $stepsize,
     );
 }
 

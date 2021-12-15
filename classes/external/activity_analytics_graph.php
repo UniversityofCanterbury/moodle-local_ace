@@ -116,7 +116,9 @@ class activity_analytics_graph extends external_api {
                     'value' => new external_value(PARAM_FLOAT, 'Engagement Value'),
                     'label' => new external_value(PARAM_TEXT, 'Engagement Label')
                 ])
-            )
+            ),
+            'max' => new external_value(PARAM_INT, 'Max value'),
+            'stepsize' => new external_value(PARAM_INT, 'Stepsize'),
         ]);
     }
 
