@@ -122,13 +122,12 @@ class userentity extends base {
                        ON {$this->logstorealias2}.courseid = {$coursealias}.id
                        AND {$this->logstorealias2}.userid = {$usertablealias}.id";
 
-        $jointotal = "LEFT JOIN (
-                           SELECT courseid, userid, COUNT(*) as total
-                               FROM {logstore_standard_log}
-                           WHERE timecreated > $timestart AND crud = 'r' AND courseid = $courseid
-                           GROUP BY courseid, userid) AS {$this->logstorealias3}
-                       ON {$this->logstorealias3}.courseid = {$coursealias}.id
-                       AND {$this->logstorealias3}.userid = {$usertablealias}.id";
+        $jointotal = "LEFT JOIN (SELECT SUM(viewcount) AS total, courseid, userid
+                                      FROM {local_ace_log_summary}
+	                                 WHERE courseid = $courseid
+                                  GROUP BY courseid, userid) {$this->logstorealias3}
+                                  ON {$this->logstorealias3}.courseid = {$coursealias}.id
+                                 AND {$this->logstorealias3}.userid = {$usertablealias}.id";
 
         $this->add_selectable_column('u');
 

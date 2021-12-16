@@ -222,14 +222,11 @@ class coursemodules extends base {
         ->add_fields("mmj.duedate")
         ->set_callback([format::class, 'userdate']);
 
-        $viewcountsql = "LEFT JOIN (SELECT COUNT(id) as viewcounttotal, contextinstanceid
-                                 FROM {logstore_standard_log}
-                                WHERE timecreated > $timestart
-                                      AND courseid = $courseid
-                                      AND contextlevel = ".CONTEXT_MODULE."
-                                      AND crud = 'r'
-                             GROUP BY contextinstanceid) {$totalviewcountalias}
-                             ON {$totalviewcountalias}.contextinstanceid = {$cmalias}.id";
+        $viewcountsql = "LEFT JOIN (SELECT SUM(viewcount) AS viewcounttotal, cmid
+                                      FROM {local_ace_log_summary}
+	                                 WHERE courseid = $courseid
+                                  GROUP BY cmid) {$totalviewcountalias}
+                             ON {$totalviewcountalias}.cmid = {$cmalias}.id";
 
         $columns[] = (new column(
             'viewcounttotal',
@@ -241,14 +238,11 @@ class coursemodules extends base {
             ->set_type(column::TYPE_INTEGER)
             ->add_fields("{$totalviewcountalias}.viewcounttotal");
 
-        $viewcountusersql = "LEFT JOIN (SELECT COUNT(id) as viewcounttotal, contextinstanceid
-                                 FROM {logstore_standard_log}
-                                WHERE timecreated > $timestart AND courseid = $courseid AND userid = $userid
-                                      AND contextlevel = ".CONTEXT_MODULE."
-                                      AND crud = 'r'
-                             GROUP BY contextinstanceid) {$totalviewcountuseralias}
-                             ON {$totalviewcountuseralias}.contextinstanceid = {$cmalias}.id";
-
+        $viewcountusersql = "LEFT JOIN (SELECT SUM(viewcount) AS viewcounttotal, cmid
+                                      FROM {local_ace_log_summary}
+	                                 WHERE courseid = $courseid AND userid = $userid
+                                  GROUP BY cmid) {$totalviewcountuseralias}
+                             ON {$totalviewcountuseralias}.cmid = {$cmalias}.id";
         $columns[] = (new column(
             'viewcounttotaluser',
             new lang_string('totalviewsuser', 'local_ace'),
@@ -296,12 +290,11 @@ class coursemodules extends base {
             ->add_field("{$this->logstorealias2}.lastaccessthis")
             ->set_callback([format::class, 'userdate']);
 
-        $countallusersjoin = "JOIN (SELECT count(distinct userid) as countallusers, contextinstanceid
-                                           FROM {logstore_standard_log}
-                                          WHERE timecreated > $timestart AND courseid = $courseid AND contextlevel = ".CONTEXT_MODULE ."
-                                                AND crud = 'r'
-                                       GROUP BY contextinstanceid) {$this->logstorealias3}
-                                        ON {$this->logstorealias3}.contextinstanceid = {$cmalias}.id";
+        $countallusersjoin = "JOIN (SELECT count(distinct userid) as countallusers, cmid
+                                           FROM {local_ace_log_summary}
+                                          WHERE courseid = $courseid
+                                       GROUP BY cmid) {$this->logstorealias3}
+                                        ON {$this->logstorealias3}.cmid = {$cmalias}.id";
         $columns[] = (new column(
             'countallusers',
             new lang_string('countallusers', 'local_ace'),
@@ -316,16 +309,16 @@ class coursemodules extends base {
         $studentroleid = (int)get_config('local_ace', 'studentrole');
         // This hard-codes against the student role which is usually not ideal, however we make a column above available
         // for sites that do not use wish to use the student role.
-        $countallstudentsjoin = "JOIN (SELECT count(distinct casjl.userid) as countallusers, casjl.contextinstanceid
-                                           FROM {logstore_standard_log} casjl
-                                           JOIN {context} casjc ON casjc.instanceid = casjl.courseid
-                                                AND casjc.contextlevel = " . CONTEXT_COURSE . "
-                                           JOIN {role_assignments} casjra ON casjra.contextid = casjc.id
-                                                AND casjl.userid = casjra.userid AND casjra.roleid = {$studentroleid}
-                                          WHERE casjl.timecreated > $timestart AND casjl.courseid = $courseid
-                                                AND casjl.contextlevel = ".CONTEXT_MODULE ." AND crud = 'r'
-                                       GROUP BY contextinstanceid) {$this->logstorealias4}
-                                        ON {$this->logstorealias4}.contextinstanceid = {$cmalias}.id";
+        $coursecontextid = empty($course) ? 0 : \context_course::instance($course->id)->id;
+        $countallstudentsjoin = "JOIN (
+                                    SELECT count(distinct userid) as countallusers, cmid
+                                      FROM {local_ace_log_summary}
+                                     WHERE courseid = $courseid AND userid IN (
+                                           SELECT casju.id
+                                             FROM {user} casju
+                                             JOIN {role_assignments} casjra ON casjra.contextid = {$coursecontextid}
+                                                  AND casjra.roleid = {$studentroleid} AND casjra.userid = casju.id)
+                                  GROUP BY cmid) {$this->logstorealias4} ON {$this->logstorealias4}.cmid = {$cmalias}.id";
 
         $usercount = $this->get_usercount($courseid);
         $columns[] = (new column(

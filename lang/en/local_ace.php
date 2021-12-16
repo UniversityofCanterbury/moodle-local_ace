@@ -177,3 +177,4 @@ $string['countallstudents'] = 'Number of students who have accessed this activit
 $string['cachedef_coursestudentcount'] = 'This contains a cache of the total number of students in a course.';
 $string['studentrole'] = 'Student role';
 $string['studentrole_desc'] = 'This is the role usually used as the student role in the course, it is used in the student related reportbuilder columns';
+$string['logsummary'] = 'Used to generate stats on logs table for course module views.';
