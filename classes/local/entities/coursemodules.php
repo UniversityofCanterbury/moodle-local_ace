@@ -131,9 +131,6 @@ class coursemodules extends base {
             $courseid = 0; // Should not happen when using this entity correctly, set to 0 to prevent SQL dying.
         }
 
-        // Only include relevant logs table logs - 4 weeks before startdate, or last 30 weeks.
-        $timestart = !empty($course->startdate) ? $course->startdate - (4 * WEEKSECS) : time() - (30 * WEEKSECS);
-
         // Determine which user to use within the user specific columns - use $PAGE->context if user context or global $USER.
         $userid = $USER->id;
         if (!empty($PAGE->context) && $PAGE->context->contextlevel == CONTEXT_USER) {
