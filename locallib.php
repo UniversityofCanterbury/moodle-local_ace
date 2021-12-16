@@ -1086,6 +1086,14 @@ function local_ace_get_course_helper() {
             if (!empty($params['course']) && $params['course'] != SITEID) {
                 $course = get_course((int)$params['course']);
                 return $course;
+            } else if (!empty($params['contextid'])) {
+                $context = context::instance_by_id($params['contextid'], IGNORE_MISSING);
+                if (!empty($context)) {
+                    $coursecontext = $context->get_course_context(false);
+                    if (!empty($coursecontext) && !empty($coursecontext->instanceid) && $coursecontext->instanceid != SITEID) {
+                        return get_course($coursecontext->instanceid);
+                    }
+                }
             }
         }
     }
