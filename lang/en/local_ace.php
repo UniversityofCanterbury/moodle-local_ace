@@ -105,12 +105,17 @@ $string['showdailyaccess'] = 'Show daily access';
 $string['acedashboard'] = 'ACE Dashboard';
 
 $string['privacy:metadata:local_ace'] = 'Summary of user analytics data';
+$string['privacy:metadata:local_ace_log_summary'] = 'User activity log summary';
 $string['privacy:metadata:local_ace:userid'] = 'The Moodle userid';
 $string['privacy:metadata:local_ace:starttime'] = 'The start of the analysis period';
 $string['privacy:metadata:local_ace:endtime'] = 'The end of the analysis period';
 $string['privacy:metadata:local_ace:value'] = 'The average indicator value for this period';
+$string['privacy:metadata:local_ace:viewcount'] = 'The number of user views for this activity';
 $string['privacy:metadata:preference:localaceteacherhiddencourses'] = 'Updates the hidden courses user preference.';
 $string['privacy:metadata:preference:localacecomparisonmethod'] = 'Updates the comparison method user preference.';
+$string['privacy:metadata:courseid'] = 'Course ID';
+$string['privacy:metadata:cmid'] = 'The ID of the activity or resource';
+$string['privacy:metadata:userid'] = 'The userid of the user';
 
 $string['emailsend'] = 'Send';
 $string['emailtext'] = 'Email text';

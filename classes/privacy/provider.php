@@ -54,6 +54,16 @@ class provider implements
              ], 'privacy:metadata:local_ace'
         );
 
+        $collection->add_database_table(
+            'local_ace_log_summary',
+            [
+                'courseid' => 'privacy:metadata:courseid',
+                'cmid' => 'privacy:metadata:cmid',
+                'userid' => 'privacy:metadata:userid',
+                'viewcount' => 'privacy:metadata:local_ace:viewcount',
+            ], 'privacy:metadata:local_ace_log_summary'
+        );
+
         $collection->add_user_preference(
             'local_ace_teacher_hidden_courses', 'privacy:metadata:preference:localaceteacherhiddencourses'
         );
@@ -125,6 +135,13 @@ class provider implements
             "contextid = :cx AND userid $insql",
             $inparams
         );
+
+        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select(
+            'local_ace_log_summary',
+            "userid $insql",
+            $inparams
+        );
     }
 
     /**
@@ -174,6 +191,12 @@ class provider implements
             'local_ace_samples',
             "userid = :userid AND (contexid $insql)",
             $inparams + $params
+        );
+
+        $DB->delete_records_select(
+            'local_ace_log_summary',
+            "userid = :userid",
+            $params
         );
     }
 
