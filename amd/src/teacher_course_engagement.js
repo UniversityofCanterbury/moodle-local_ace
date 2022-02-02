@@ -39,7 +39,6 @@ let COLOURS = [];
 export const init = (parameters) => {
     COLOURS = parameters.colours;
     filtersInit(updateGraph);
-    updateGraph(null, null);
 
     document.querySelector("#course-filter").addEventListener("click", courseFilter);
 };

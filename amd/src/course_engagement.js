@@ -41,7 +41,6 @@ export const init = (parameters) => {
     COURSE_ID = parameters.courseid;
     COURSE_REPORT_LINE_COLOUR = parameters.colourteachercoursehistory;
     filtersInit(updateGraph);
-    updateGraph(null, null);
 };
 
 /**

@@ -22,6 +22,7 @@
  */
 
 import Litepicker from 'local_ace/litepicker';
+import Ajax from 'core/ajax';
 
 const FILTER_ACTIVE = "active";
 
@@ -40,16 +41,58 @@ let updateFunc = null;
  * @param {Function} providedFunc graph function
  */
 export const init = (providedFunc) => {
+    updateFunc = providedFunc;
     // Set default filter, update display, set handlers
     let filter = getActiveFilter();
     if (filter === null) {
-        // Course to date is our default filter
-        filter = document.querySelector(Selectors.courseToDate);
-        setActiveFilter(filter);
+        // Get the user preference, attempt to set the filter. Fall back to the course to date filter.
+        getChartFilterPreference().then(response => {
+            if (response.error) {
+                return;
+            }
+            if (response.preferences[0].value !== null) {
+                // Set the filter based on the filter node that matches the given filter ID.
+                getFilterNodes().forEach((element) => {
+                    if (element.id === response.preferences[0].value) {
+                        if (element.id === 'last-12-days') {
+                            set12DaysFilter();
+                        } else if (element.id === 'course-to-date') {
+                            setCourseToDateFilter();
+                        }
+                    }
+                });
+            }
+        }).then(() => {
+            // If setting via user preference fails we set the default.
+            if (getActiveFilter() === null) {
+                setCourseToDateFilter();
+            }
+        });
     }
 
     setupFilters();
-    updateFunc = providedFunc;
+};
+
+
+/**
+ * Set course to date filter.
+ */
+const setCourseToDateFilter = () => {
+    let filter = document.querySelector(Selectors.courseToDate);
+    setActiveFilter(filter);
+    updateFunc(null, null);
+};
+
+/**
+ * Set the last 12 days filter.
+ */
+const set12DaysFilter = () => {
+    let filter = document.querySelector(Selectors.last12Days);
+    setActiveFilter(filter);
+    let date = new Date();
+    date.setDate(date.getDate() - 12);
+    let val = date.getTime() / 1000;
+    updateFunc(val.toFixed(0), null);
 };
 
 /**
@@ -61,11 +104,15 @@ const setActiveFilter = (suppliedFilter) => {
     getFilterNodes().forEach((filter) => {
         if (filter === suppliedFilter) {
             filter.dataset.filter = FILTER_ACTIVE;
+
+            // We can't store the date range as a user preference because of the extra params required.
+            if (filter.id !== 'date-range') {
+                updateChartFilterPreference(filter.id);
+            }
         } else {
             filter.dataset.filter = null;
         }
-
-        updateFilterDisplay();
+        updateFilterDisplay(filter);
     });
 };
 
@@ -78,18 +125,13 @@ const setupFilters = () => {
 
     let courseToDateFilter = filtersNode.querySelector(Selectors.courseToDate);
     courseToDateFilter.addEventListener("click", () => {
-        setActiveFilter(courseToDateFilter);
-        updateFunc(null, null);
+        setCourseToDateFilter();
         picker.clearSelection();
     });
 
     let last12DaysFilter = filtersNode.querySelector(Selectors.last12Days);
     last12DaysFilter.addEventListener("click", () => {
-        setActiveFilter(last12DaysFilter);
-        var date = new Date();
-        date.setDate(date.getDate() - 12);
-        let val = date.getTime() / 1000;
-        updateFunc(val.toFixed(0), null);
+        set12DaysFilter();
         picker.clearSelection();
     });
 
@@ -114,18 +156,17 @@ const setupFilters = () => {
 
 /**
  * Update the filter colours to display which is active.
+ *
+ * @param {Element} filter
  */
-const updateFilterDisplay = () => {
-    let filters = getFilterNodes();
-    filters.forEach((filter) => {
-        if (filter.dataset.filter === FILTER_ACTIVE) {
-            filter.classList.add("btn-primary");
-            filter.classList.remove("btn-secondary");
-        } else {
-            filter.classList.add("btn-secondary");
-            filter.classList.remove("btn-primary");
-        }
-    });
+const updateFilterDisplay = (filter) => {
+    if (filter.dataset.filter === FILTER_ACTIVE) {
+        filter.classList.add("btn-primary");
+        filter.classList.remove("btn-secondary");
+    } else {
+        filter.classList.add("btn-secondary");
+        filter.classList.remove("btn-primary");
+    }
 };
 
 /**
@@ -154,4 +195,40 @@ const getFilterNodes = () => {
         filtersNode.querySelector(Selectors.last12Days),
         filtersNode.querySelector(Selectors.dateRange)
     ];
+};
+
+/**
+ * Updates the comparison method user preference.
+ *
+ * @param {string} activeFilter Filter ID
+ */
+const updateChartFilterPreference = function(activeFilter) {
+    let request = {
+        methodname: 'core_user_update_user_preferences',
+        args: {
+            preferences: [
+                {
+                    type: 'local_ace_default_chart_filter',
+                    value: activeFilter
+                }
+            ]
+        }
+    };
+
+    Ajax.call([request])[0].fail(Notification.exception);
+};
+
+/**
+ * Return a promise for the comparison method user preference.
+ *
+ * @returns {Promise}
+ */
+const getChartFilterPreference = function() {
+    let request = {
+        methodname: 'core_user_get_user_preferences',
+        args: {
+            name: 'local_ace_default_chart_filter'
+        }
+    };
+    return Ajax.call([request])[0];
 };

@@ -23,10 +23,12 @@
  */
 
 namespace local_ace\privacy;
+
 use core_privacy\local\metadata\collection;
-use core_privacy\local\request\{writer, helper, contextlist, approved_contextlist, approved_userlist, userlist};
+use core_privacy\local\request\{approved_contextlist, approved_userlist, contextlist, transform, userlist, writer};
 
 defined('MOODLE_INTERNAL') || die();
+
 /**
  * Privacy Subsystem for local_ace implementing provider.
  *
@@ -43,15 +45,15 @@ class provider implements
      * @param collection $collection The initialised collection to add items to.
      * @return collection A listing of user data stored through this system.
      */
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
             'local_ace_samples',
-             [
+            [
                 'userid' => 'privacy:metadata:local_ace:userid',
                 'starttime' => 'privacy:metadata:local_ace:starttime',
                 'endtime' => 'privacy:metadata:local_ace:endtime',
                 'value' => 'privacy:metadata:local_ace:value',
-             ], 'privacy:metadata:local_ace'
+            ], 'privacy:metadata:local_ace'
         );
 
         $collection->add_database_table(
@@ -65,10 +67,13 @@ class provider implements
         );
 
         $collection->add_user_preference(
-            'local_ace_teacher_hidden_courses', 'privacy:metadata:preference:localaceteacherhiddencourses'
+            'local_ace_teacher_hidden_courses', 'privacy:metadata:preference:teacher_hidden_courses'
         );
         $collection->add_user_preference(
-            'local_ace_comparison_method', 'privacy:metadata:preference:localacecomparisonmethod'
+            'local_ace_comparison_method', 'privacy:metadata:preference:comparison_method'
+        );
+        $collection->add_user_preference(
+            'local_ace_default_chart_filter', 'privacy:metadata:preference:default_chart_filter'
         );
 
         return $collection;
@@ -77,7 +82,7 @@ class provider implements
     /**
      * Export all user preferences for the plugin.
      *
-     * @param   int         $userid The userid of the user whose data is to be exported.
+     * @param int $userid The userid of the user whose data is to be exported.
      */
     public static function export_user_preferences(int $userid) {
         $teacherhiddencourses = get_user_preferences('local_ace_teacher_hidden_courses', null, $userid);
@@ -85,15 +90,25 @@ class provider implements
             writer::export_user_preference('local_ace',
                 'local_ace_teacher_hidden_courses',
                 transform::yesno($teacherhiddencourses),
-                get_string('privacy:metadata:preference:localaceteacherhiddencourses', 'local_ace')
+                get_string('privacy:metadata:preference:teacher_hidden_courses', 'local_ace')
             );
         }
+
         $comparisonmethod = get_user_preferences('local_ace_comparison_method', null, $userid);
         if ($comparisonmethod !== null) {
             writer::export_user_preference('local_ace',
                 'local_ace_comparison_method',
                 transform::yesno($comparisonmethod),
-                get_string('privacy:metadata:preference:localacecomparisonmethod', 'local_ace')
+                get_string('privacy:metadata:preference:comparison_method', 'local_ace')
+            );
+        }
+
+        $chartfilter = get_user_preferences('local_ace_default_chart_filter', null, $userid);
+        if ($chartfilter !== null) {
+            writer::export_user_preference('local_ace',
+                'local_ace_default_chart_filter',
+                $chartfilter,
+                get_string('privacy:metadata:preference:default_chart_filter', 'local_ace')
             );
         }
     }
@@ -101,7 +116,7 @@ class provider implements
     /**
      * Get the list of users who have data within a context.
      *
-     * @param   userlist    $userlist   The userlist containing the list of users who have data in this context/plugin combination.
+     * @param userlist $userlist The userlist containing the list of users who have data in this context/plugin combination.
      */
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
@@ -136,7 +151,6 @@ class provider implements
             $inparams
         );
 
-        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $DB->delete_records_select(
             'local_ace_log_summary',
             "userid $insql",
@@ -182,7 +196,7 @@ class provider implements
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
 
-        $userid = (int)$contextlist->get_user()->id;
+        $userid = (int) $contextlist->get_user()->id;
         $params = ['userid' => $userid];
         $contextids = $contextlist->get_contextids();
         list($insql, $inparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED);
@@ -196,20 +210,20 @@ class provider implements
         $DB->delete_records_select(
             'local_ace_log_summary',
             "userid = :userid",
-            $params
+            $inparams + $params
         );
     }
 
     /**
      * Export all user data for the specified user, in the specified contexts, using the supplied exporter instance.
      *
-     * @param   approved_contextlist    $contextlist    The approved contexts to export information for.
+     * @param approved_contextlist $contextlist The approved contexts to export information for.
      */
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
         $data = [];
 
-        $userid = (int)$contextlist->get_user()->id;
+        $userid = (int) $contextlist->get_user()->id;
         $results = $DB->get_records('local_ace_samples', array('userid' => $userid));
         foreach ($results as $result) {
             $data[] = (object) [

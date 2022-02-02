@@ -48,7 +48,6 @@ export const init = (parameters) => {
     COLOUR_ACTIVITY_ENGAGEMENT = parameters.colouractivityengagement;
     CMID = parameters.cmid;
     filtersInit(updateGraph);
-    updateGraph();
 
     document.querySelector('#show-cumulative').addEventListener('click', showCumulativeGraph);
     document.querySelector('#show-daily-access').addEventListener('click', showDaily);

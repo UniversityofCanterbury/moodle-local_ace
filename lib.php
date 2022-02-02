@@ -39,6 +39,11 @@ function local_ace_user_preferences() {
             'null' => NULL_ALLOWED,
             'default' => 'none'
         ],
+        'local_ace_default_chart_filter' => [
+            'type' => PARAM_TEXT,
+            'null' => NULL_ALLOWED,
+            'default' => 'none'
+        ],
     ];
 }
 
