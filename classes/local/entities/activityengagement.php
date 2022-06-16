@@ -107,18 +107,12 @@ class activityengagement extends base {
         $totalaccessalias = $this->get_table_alias('totalaccess');
         $logalias = $this->get_table_alias('logstore_standard_log');
 
-        $lastaccessjoin = "LEFT JOIN {logstore_standard_log} {$logalias} ON {$logalias}.id = (
-                                SELECT
-                                    id
-                                FROM
-                                    {logstore_standard_log}
-                                WHERE
-                                    courseid = " . ($course->id ?? 'NULL') . "
-                                    AND contextid = " . ($context->id ?? 'NULL') . "
-                                    AND userid = {$useralias}.id
-                                ORDER BY
-                                    id DESC
-                                LIMIT 1)";
+        $lastaccessjoin = "LEFT JOIN (SELECT max(timecreated) as timecreated, userid
+                                        FROM {logstore_standard_log}
+                                       WHERE courseid = " . ($course->id ?? 'NULL') . " AND
+                                             contextid = " . ($context->id ?? 'NULL') . "
+                                    GROUP BY userid
+                                      )  {$logalias} on {$logalias}.userid = {$useralias}.id";
         $totalaccessjoin = "LEFT JOIN (
                                 SELECT COUNT(id), userid
                                 FROM {logstore_standard_log}

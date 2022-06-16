@@ -113,6 +113,7 @@ class userenrolment extends base {
         $roleassignmentalias = $this->get_table_alias('role_assignments');
 
         $course = \local_ace_get_course_helper();
+        $coursejoin = '';
         if (!empty($course) && $course->id !== SITEID) {
             $coursejoin = " AND {$enrolalias}.courseid = {$course->id}";
         }

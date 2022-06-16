@@ -20,6 +20,7 @@ namespace local_ace\reportbuilder\datasource;
 
 use core_reportbuilder\datasource;
 use local_ace\local\entities\aceuser;
+use local_ace\local\entities\userenrolment;
 use local_ace\local\entities\activityengagement;
 
 /**
@@ -46,34 +47,42 @@ class useractivity extends datasource {
     protected function initialise(): void {
         $activityengagement = new activityengagement();
         $userentity = new aceuser();
+        $enrolmententity = new userenrolment();
 
         $cmalias = $activityengagement->get_table_alias('course_modules');
         $useralias = $userentity->get_table_alias('user');
         $coursealias = $activityengagement->get_table_alias('course');
         $enrolalias = $activityengagement->get_table_alias('enrol');
-        $uealias = $activityengagement->get_table_alias('user_enrolments');
+        $uealias = $enrolmententity->get_table_alias('user_enrolments');
         $contextalias = $activityengagement->get_table_alias('context');
 
-        $userjoin = "JOIN {course} {$coursealias} ON {$coursealias}.id = {$cmalias}.course
-                    JOIN {enrol} {$enrolalias} ON {$enrolalias}.courseid = {$coursealias}.id
-                    JOIN {user_enrolments} {$uealias} ON {$uealias}.enrolid = {$enrolalias}.id
-                    JOIN {user} {$useralias} ON {$useralias}.id = {$uealias}.userid
-                    JOIN {context} {$contextalias} ON {$contextalias}.instanceid = {$cmalias}.id
-                    AND {$contextalias}.contextlevel = " . CONTEXT_MODULE;
+        $activityjoin = "JOIN {context} {$contextalias} ON {$contextalias}.instanceid = {$cmalias}.id
+                            AND {$coursealias}.id = {$cmalias}.course
+                            AND {$contextalias}.contextlevel = " . CONTEXT_MODULE;
 
         $this->set_main_table('course_modules', $cmalias);
-        $this->add_entity($activityengagement->add_join($userjoin));
+        $this->add_entity($activityengagement->add_join($activityjoin));
+
+        $this->add_entity($enrolmententity);
+
+        $userjoin = "JOIN {course} {$coursealias} ON {$coursealias}.id = {$cmalias}.course
+                     JOIN {enrol} {$enrolalias} ON {$enrolalias}.courseid = {$coursealias}.id
+                     JOIN {user_enrolments} {$uealias} ON {$uealias}.enrolid = {$enrolalias}.id
+                     JOIN {user} {$useralias} ON {$useralias}.id = {$uealias}.userid";
 
         $this->add_entity($userentity->add_join($userjoin));
 
         $this->add_columns_from_entity($activityengagement->get_entity_name());
         $this->add_columns_from_entity($userentity->get_entity_name());
+        $this->add_columns_from_entity($enrolmententity->get_entity_name());
 
         $this->add_filters_from_entity($activityengagement->get_entity_name());
         $this->add_filters_from_entity($userentity->get_entity_name());
+        $this->add_filters_from_entity($enrolmententity->get_entity_name());
 
         $this->add_conditions_from_entity($activityengagement->get_entity_name());
         $this->add_conditions_from_entity($userentity->get_entity_name());
+        $this->add_conditions_from_entity($enrolmententity->get_entity_name());
 
         $this->add_action_button([
             'id' => 'emailallselected',
