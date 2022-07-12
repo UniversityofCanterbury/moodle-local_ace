@@ -51,6 +51,7 @@ class userenrolment extends base {
             'user_lastaccess' => 'ueul',
             'context' => 'uectx',
             'role_assignments' => 'eura',
+            'groups' => 'uegr',
         ];
     }
 
@@ -111,6 +112,7 @@ class userenrolment extends base {
         $userlastaccessalias = $this->get_table_alias('user_lastaccess');
         $contextalias = $this->get_table_alias('context');
         $roleassignmentalias = $this->get_table_alias('role_assignments');
+        $groupsalias = $this->get_table_alias('groups');
 
         $course = \local_ace_get_course_helper();
         $coursejoin = '';
@@ -193,6 +195,16 @@ class userenrolment extends base {
             ->add_fields("$userlastaccessalias.timeaccess")
             ->set_callback([format::class, 'userdate']);
 
+        $columns[] = (new column(
+                'groups',
+                new lang_string('groups', 'local_ace'),
+                $this->get_entity_name()
+            ))
+                ->add_joins($this->get_joins())
+                ->add_join($this->get_group_join())
+                ->set_is_sortable(true)
+                ->add_fields("{$groupsalias}.name");
+
         return $columns;
     }
 
@@ -216,6 +228,7 @@ class userenrolment extends base {
         $enrolalias = $this->get_table_alias('enrol');
         $rolealias = $this->get_table_alias('role');
         $userlastaccessalias = $this->get_table_alias('user_lastaccess');
+        $groupsalias = $this->get_table_alias('groups');
 
         // Time enrolment started (user_enrolments.timestart).
         $filters[] = (new filter(
@@ -295,6 +308,38 @@ class userenrolment extends base {
         ))
             ->add_joins($this->get_joins());
 
+        $filters[] = (new filter(
+            text::class,
+            'groups',
+            new lang_string('groups', 'local_ace'),
+            $this->get_entity_name(),
+            "{$groupsalias}.name"
+        ))
+            ->add_joins($this->get_joins())
+            ->add_join($this->get_group_join());
+
         return $filters;
+    }
+
+    /**
+     * Return joins necessary for retrieving groups
+     *
+     * @return string
+     */
+    private function get_group_join(): string {
+        $userenrolmentsalias = $this->get_table_alias('user_enrolments');
+        $groupsalias = $this->get_table_alias('groups');
+        $enrolalias = $this->get_table_alias('enrol');
+
+        $course = \local_ace_get_course_helper();
+        $coursegroupjoin = '';
+        if (!empty($course) && $course->id !== SITEID) {
+            $coursegroupjoin = " AND grg.courseid = {$course->id}";
+        }
+
+        return "LEFT JOIN (SELECT grg.name, grgm.userid, grg.courseid
+                           FROM {groups} grg
+                           JOIN {groups_members} grgm on grgm.groupid = grg.id {$coursegroupjoin}) {$groupsalias} ON
+                           {$groupsalias}.courseid = {$enrolalias}.courseid AND {$groupsalias}.userid = {$userenrolmentsalias}.userid";
     }
 }
