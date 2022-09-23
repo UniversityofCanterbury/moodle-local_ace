@@ -22,6 +22,7 @@ use core\event\course_content_deleted;
 use core_reportbuilder\local\filters\text;
 use core_reportbuilder\local\filters\date;
 use core_reportbuilder\local\filters\boolean_select;
+use core_reportbuilder\local\filters\number;
 use core_reportbuilder\local\helpers\format;
 use core_reportbuilder\local\report\column;
 use core_reportbuilder\local\report\filter;
@@ -63,6 +64,8 @@ class coursemodules extends base {
     private $logstorealias4 = "cmlsls4";
     /** @var string */
     private $logstorealias5 = "cmlsls5";
+    /** @var string */
+    private $logstorealias6 = "cmlsls6";
 
     /**
      * Database tables that this entity uses and their default aliases
@@ -367,6 +370,42 @@ class coursemodules extends base {
                 $percentage = empty($value) ? "0" : round(($value / $usercount) * 100);
                 return $percentage . "% (".$value . '/' . $usercount . ")";
             });
+
+        $submissionratejoin  = "LEFT JOIN (
+                                    SELECT COUNT(DISTINCT userid) submissionrate, cmid FROM (
+                                        SELECT asub.userid userid, cm.id cmid
+                                        FROM {assign} a
+                                        JOIN {course_modules} cm ON a.id = cm.instance
+                                        JOIN {modules} m ON m.id = cm.module AND m.name = 'assign'
+                                        JOIN {assign_submission} asub ON asub.assignment = a.id
+                                        JOIN {user} u ON u.id = asub.userid
+                                        JOIN {role_assignments} ra ON ra.userid = u.id
+                                        AND ra.contextid = $coursecontextid
+                                        AND ra.roleid = $studentroleid
+                                        WHERE asub.status = 'submitted'
+                                        AND a.course = $courseid
+                                        AND u.deleted = 0
+                                    ) AS submissionrate GROUP BY cmid
+                                ) {$this->logstorealias6} ON {$this->logstorealias6}.cmid = {$cmalias}.id";
+
+        $columns[] = (new column(
+            'submissionrate',
+            new lang_string('submissionrate', 'local_ace'),
+            $this->get_entity_name()
+        ))
+            ->add_joins($this->get_joins())
+            ->add_join($submissionratejoin)
+            ->set_is_sortable(true)
+            ->set_type(column::TYPE_INTEGER)
+            ->add_field("{$this->logstorealias6}.submissionrate")
+            ->add_callback(static function(?int $value) use ($usercount): string {
+                if ($value === null) {
+                    $value = 0;
+                }
+                $percentage = empty($value) ? "0" : round(($value / $usercount) * 100);
+                return "$percentage% ($value/$usercount)";
+            });
+
         return $columns;
     }
 
@@ -422,6 +461,24 @@ class coursemodules extends base {
             new lang_string('coursemodulevisible', 'local_ace'),
             $this->get_entity_name(),
             "{$cmalias}.visible"
+        ))
+            ->add_joins($this->get_joins());
+
+        $filters[] = (new filter(
+            number::class,
+            'completionrate',
+            new lang_string('completionratefilter', 'local_ace'),
+            $this->get_entity_name(),
+            "{$this->logstorealias5}.completionrate"
+        ))
+            ->add_joins($this->get_joins());
+
+        $filters[] = (new filter(
+            number::class,
+            'submissionrate',
+            new lang_string('submissionratefilter', 'local_ace'),
+            $this->get_entity_name(),
+            "{$this->logstorealias6}.submissionrate"
         ))
             ->add_joins($this->get_joins());
 

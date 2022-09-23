@@ -72,6 +72,7 @@ $string['colouruserhistory_desc'] = 'The colour used for the average user engage
 $string['colouractivityengagement'] = 'Activity engagement';
 $string['colouractivityengagement_desc'] = 'The colour used for the activity engagement level';
 $string['coursemodulevisible'] = 'Visible to students';
+$string['completionratefilter'] = 'Number of completions';
 $string['courseregex'] = 'Course shortname regex';
 $string['courseregex_desc'] =
     'Regex to cover courses we want to be included in the analytics. The data entered here will be compared against the course shortname.';
@@ -102,6 +103,7 @@ $string['yourengagement'] = 'Your engagement';
 $string['coursefilter'] = 'Course filter';
 $string['showcumulative'] = 'Show cumulative';
 $string['showdailyaccess'] = 'Show daily access';
+$string['submissionratefilter'] = 'Number of submissions';
 $string['acedashboard'] = 'ACE Dashboard';
 
 $string['privacy:metadata:local_ace'] = 'Summary of user analytics data';
@@ -179,6 +181,7 @@ $string['totalwrites'] = 'No. of writes';
 $string['lastaccessanyuser'] = 'Last access by any user';
 $string['lastaccessthisuser'] = 'Last access by this user';
 $string['completionrate'] = 'Rate of students who have completed this activity';
+$string['submissionrate'] = 'Rate of assignment submissions';
 $string['countallusers'] = 'Number of users who have accessed this activity';
 $string['countallstudents'] = 'Number of students who have accessed this activity';
 $string['cachedef_coursestudentcount'] = 'This contains a cache of the total number of students in a course.';
