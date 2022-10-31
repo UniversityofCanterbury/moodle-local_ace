@@ -6,8 +6,8 @@ The University of Canterbury is currently running this on a heavily modified ver
 
 It also currently requires the following trackers which we have been working on and trying to get into Moodle core.
 * https://tracker.moodle.org/browse/MDL-73184 (now in 4.1)
+* https://tracker.moodle.org/browse/MDL-75170 (now in 4.1)
 * https://tracker.moodle.org/browse/MDL-73294 
-* https://tracker.moodle.org/browse/MDL-75170
 * https://tracker.moodle.org/browse/MDL-72974
 * https://tracker.moodle.org/browse/MDL-73104
 * https://tracker.moodle.org/browse/MDL-72831
